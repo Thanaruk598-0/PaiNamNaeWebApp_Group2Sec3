@@ -266,22 +266,6 @@ cd backend && npm run dev
 
 ---
 
-## ⚠️ หมายเหตุ
-- ใช้ **port 5433** แทน 5432 เพราะเครื่องมี PostgreSQL อีกตัวรันอยู่แล้ว
-- ต้องเปิด **Docker Desktop** ก่อนรัน `docker compose up -d` ทุกครั้ง
-- ไฟล์ `.env` ไม่ควร push ขึ้น Git (ควรอยู่ใน `.gitignore`)
-- ต้องตั้งค่า **Cloudinary** ใน `backend/.env` สำหรับอัปโหลดรูปภาพ:
-  ```env
-  CLOUDINARY_CLOUD_NAME=xxx
-  CLOUDINARY_API_KEY=xxx
-  CLOUDINARY_API_SECRET=xxx
-  ```
-- ต้องตั้งค่า **Google Maps API Key** ใน `frontend/.env` สำหรับแผนที่:
-  ```env
-  NUXT_PUBLIC_GOOGLE_MAPS_API_KEY=xxx
-  ```
-- หากแก้ไข `schema.prisma` ต้อง **หยุด backend** ก่อนรัน `npx prisma generate` (ไม่งั้นจะโดน EPERM เพราะ DLL ถูก lock)
-
 ---
 
 ## 📝 Declare — การใช้ปัญญาประดิษฐ์
