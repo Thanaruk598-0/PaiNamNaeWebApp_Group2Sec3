@@ -62,6 +62,15 @@
                             </div>
                         </div>
 
+                        <!-- แจ้งเหตุการณ์ (My Reports) -->
+                        <div v-if="token">
+                            <NuxtLink :to="user && user.role === 'ADMIN' ? '/admin/reports' : '/myReports'"
+                                class="flex items-center text-gray-600 transition-colors duration-200 hover:text-blue-600"
+                                :class="{ 'text-blue-600': $route.path.startsWith('/myReports') || $route.path.startsWith('/admin/reports') }">
+                                {{ user && user.role === 'ADMIN' ? 'ดูรายงานทั้งหมด' : 'แจ้งเหตุการณ์' }}
+                            </NuxtLink>
+                        </div>
+
                         <div v-if="!token" class="flex items-center space-x-3 ">
                             <NuxtLink to="/register"
                                 class="text-gray-600 transition-colors duration-200 hover:text-blue-600">สมัครสมาชิก
@@ -319,6 +328,14 @@
                                 </NuxtLink>
                             </div>
                         </div>
+
+                        <!-- แจ้งเหตุการณ์ (My Reports) - Mobile -->
+                        <NuxtLink v-if="token" :to="user && user.role === 'ADMIN' ? '/admin/reports' : '/myReports'"
+                            class="block px-3 py-2 transition-colors duration-200 rounded-md"
+                            :class="($route.path.startsWith('/myReports') || $route.path.startsWith('/admin/reports')) ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'"
+                            @click="closeMobileMenu">
+                            {{ user && user.role === 'ADMIN' ? 'ดูรายงานทั้งหมด' : 'แจ้งเหตุการณ์' }}
+                        </NuxtLink>
 
                         <div v-if="!token">
                             <NuxtLink to="/register" class="block px-3 py-2 transition-colors duration-200 rounded-md"
