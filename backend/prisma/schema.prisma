@@ -60,6 +60,29 @@ enum NotificationType {
   ROUTE
 }
 
+enum ReportStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+}
+
+enum IncidentType {
+  DRIVER
+  PASSENGER
+  ROUTE
+  BOOKING
+  SYSTEM
+  OTHER
+}
+
+enum IncidentPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 model User {
   id                    String   @id @default(cuid())
   username              String   @unique
@@ -88,6 +111,7 @@ model User {
   notification          Notification[]
   createdRoutes         Route[]             @relation("DriverRoutes")
   bookings              Booking[]           @relation("PassengerBookings")
+  reports               Report[]
 
   @@index([role])
   @@index([isActive])
@@ -210,4 +234,26 @@ model Booking {
   pickupLocation  Json          @db.Json
   dropoffLocation Json          @db.Json
   createdAt       DateTime      @default(now())
+}
+
+model Report {
+  id           String           @id @default(cuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  incidentType IncidentType
+  priority     IncidentPriority @default(MEDIUM)
+  title        String
+  description  String
+  location     Json             @db.Json
+  imageUrl     String?
+  status       ReportStatus     @default(PENDING)
+  adminNote    String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([incidentType])
+  @@index([priority])
+  @@index([createdAt])
 }
