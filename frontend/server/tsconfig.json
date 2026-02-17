@@ -1,0 +1,8 @@
+/// หมายเหตุ: ไฟล์นี้อ้างอิง `tsconfig.server.json` ที่ Nuxt สร้างเมื่อรัน `npm run dev`
+/// หากจะมาแก้แล้วหาไฟล์ไม่เจอ ให้รัน (ในโฟลเดอร์ `frontend`):
+///   npm install
+///   npm run dev
+
+{
+  "extends": "../.nuxt/tsconfig.server.json"
+}
