@@ -287,5 +287,8 @@ cd backend && npm run dev
 4. **ปรับปรุง UI Components** — ช่วยปรับ AdminHeader (เพิ่ม Profile Dropdown), AdminSidebar (เพิ่มเมนู Report), และ Navbar (เพิ่มลิงก์แจ้งเหตุการณ์)
 5. **แก้ไขข้อผิดพลาด (Debugging)** — ช่วยวิเคราะห์และแก้ไขปัญหาต่างๆ เช่น Prisma Client EPERM, Cloudinary URL mismatch, Google Maps loading timing issue, และ missing user fields after save
 6. **ปรับปรุงระบบแชท (Chat System)** — แก้ไขปัญหา Real-time Update ของผู้ใช้ (Socket Join Room Issue) และปรับสีธีมของ Admin Chat ให้เป็นสีน้ำเงินตาม Design System
+7. **ระบบแจ้งเตือน (Notification System)** — พัฒนาระบบแจ้งเตือนแบบ Real-time (Socket.IO):
+   - แจ้งเตือนผู้ใช้เมื่อสถานะรายงานมีการเปลี่ยนแปลง (Approved/Rejected/etc.) พร้อม Deep Linking ไปยังหน้ารายละเอียด
+   - แจ้งเตือน Admin เมื่อมีรายงานใหม่ (Backend Implementation)
 
 โดยข้าพเจ้าได้ตรวจสอบความถูกต้องและแก้ไขข้อผิดพลาดอันเนื่องมาจากผลลัพธ์จากปัญญาประดิษฐ์เรียบร้อยแล้ว

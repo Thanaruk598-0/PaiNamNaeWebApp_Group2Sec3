@@ -29,6 +29,11 @@ function initSocket(httpServer) {
     io.on('connection', (socket) => {
         console.log(`🔌 Socket connected: ${socket.user.sub} (${socket.user.role})`);
 
+        // Join user-specific room
+        socket.join(`user:${socket.user.sub}`);
+
+        // Join admin room if user is admin
+
         // Join a report chat room
         socket.on('join_room', (reportId) => {
             socket.join(`report:${reportId}`);

@@ -40,6 +40,8 @@
 | FR-07 | Admin เห็นแผนที่ + รูปภาพในหน้ารายละเอียด | Should Have |
 | FR-08 | ผู้ใช้และ Admin สามารถแชทคุยกันได้แบบ Real-time | Should Have |
 | FR-09 | ระบบต้องบันทึกประวัติการแชท | Must Have |
+| FR-10 | ผู้ใช้ต้องได้รับการแจ้งเตือนเมื่อสถานะรายงานเปลี่ยนแปลง | Must Have |
+| FR-11 | Admin ไม่ควรเห็นปุ่มแจ้งเตือนที่ไม่จำเป็น | Should Have |
 
 ---
 
@@ -68,6 +70,20 @@
                    │ createdAt│
                    │ updatedAt│
                    └─────────┘
+                        │
+                   ┌────┴─────────┐
+                   │ Notification │
+                   ├──────────────┤
+                   │ id           │
+                   │ userId       │
+                   │ type (enum)  │
+                   │ title        │
+                   │ body         │
+                   │ link         │
+                   │ metadata (JSON)│
+                   │ readAt       │
+                   │ createdAt    │
+                   └──────────────┘
 ```
 
 ### Enum Values
@@ -77,6 +93,7 @@
 | IncidentType | DRIVER, PASSENGER, ROUTE, BOOKING, SYSTEM, OTHER |
 | IncidentPriority | LOW, MEDIUM, HIGH, CRITICAL |
 | ReportStatus | PENDING, IN_PROGRESS, RESOLVED, REJECTED |
+| NotificationType | SYSTEM, REPORT_UPDATE, NEW_REPORT |
 
 ### API Architecture
 
@@ -90,11 +107,16 @@ Client (Nuxt.js)
     ├──PUT  /api/reports/admin/:id────┤     → Middleware (auth, upload, validate)
     ├──DELETE /api/reports/admin/:id──┘        → Controller → Service → Prisma → PostgreSQL
     │
-    ├──Socket.IO (Real-time Chat)─────┐
+    ├──GET /api/notifications─────────┐
+    ├──PATCH /api/notifications/:id/read──┤
+    ├──DELETE /api/notifications/:id──┘
+    │
+    ├──Socket.IO (Real-time Chat & Notif)─┐
     │   ├── connect / disconnect      │
     │   ├── join_room / leave_room    │
     │   ├── send_message              │
-    │   └── typing                    │
+    │   ├── typing                    │
+    │   └── new_notification          │
     └─────────────────────────────────┘
 ```
 
@@ -161,7 +183,7 @@ Admin Login → /admin/reports → กรอง/ค้นหา → คลิก
                                                         ↓
                                                  อัปเดตสถานะ + หมายเหตุ → บันทึก
                                                         ↓
-                                             User เห็นสถานะ + หมายเหตุอัปเดต
+                               Notification แจ้งเตือน User → User คลิก → ดูรายละเอียด
                                                         ↓
                                           (Optional) User & Admin แชทคุยรายละเอียดเพิ่มเติม
 ```

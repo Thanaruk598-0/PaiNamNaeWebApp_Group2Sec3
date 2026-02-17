@@ -158,7 +158,7 @@ const updateReportStatus = async (id, patch) => {
     const existing = await prisma.report.findUnique({ where: { id } });
     if (!existing) throw new ApiError(404, 'Report not found');
 
-    return prisma.report.update({
+    const updated = await prisma.report.update({
         where: { id },
         data: {
             status: patch.status,
@@ -178,6 +178,50 @@ const updateReportStatus = async (id, patch) => {
             },
         },
     });
+
+    // Notify user about status change
+    try {
+        if (updated.userId) {
+            let messageBody = `สถานะรายงานของคุณเปลี่ยนเป็น ${updated.status}`;
+            if (patch.adminNote) {
+                messageBody += ` (หมายเหตุ: ${patch.adminNote})`;
+            }
+
+            await prisma.notification.create({
+                data: {
+                    userId: updated.userId,
+                    type: 'SYSTEM',
+                    title: 'อัปเดตสถานะรายงาน',
+                    body: messageBody,
+                    link: `/myReports`, // Direct to myReports list or specific detail if available
+                    metadata: {
+                        kind: 'REPORT_UPDATE',
+                        reportId: updated.id,
+                        status: updated.status,
+                    },
+                },
+            });
+
+            const io = require('../socket').getIO();
+            if (io) {
+                io.to(`user:${updated.userId}`).emit('new_notification', {
+                    title: 'อัปเดตสถานะรายงาน',
+                    body: messageBody,
+                    link: `/myReports`,
+                    createdAt: new Date(),
+                    metadata: {
+                        kind: 'REPORT_UPDATE',
+                        reportId: updated.id,
+                        status: updated.status,
+                    },
+                });
+            }
+        }
+    } catch (err) {
+        console.error('Failed to notify user about report update:', err);
+    }
+
+    return updated;
 };
 
 /** Admin: delete a report */

@@ -8,6 +8,10 @@
 - **Admin Chat:** แก้ไขปัญหา Socket ไม่ Join Room เมื่อเปลี่ยนหน้ารายงาน (Multiplexing Fix)
 - **Chat Limit:** เพิ่มจำกัดความยาวข้อความแชทจาก 2,000 เป็น 5,000 ตัวอักษร
 - **Admin Chat UI:** ปรับเปลี่ยนธีมสีของหน้าแชทฝั่ง Admin ให้เป็นสีน้ำเงิน (Blue Theme) ตาม Design System ใหม่
+- **Notification System:**
+    - **User Notifications:** เพิ่มแจ้งเตือนผู้ใช้เมื่อ Admin อัปเดตสถานะรายงาน (พร้อม Deep Link)
+    - **Admin UI:** ลบปุ่มแจ้งเตือน (Bell Icon) ออกจาก Admin Header ตาม Requirement ใหม่
+    - **Socket.IO:** ปรับปรุงให้ User Join Room `user:{id}` เพื่อรองรับการแจ้งเตือนส่วนตัว
 
 ### 📝 Documentation
 - **README_phuchit.md:** เพิ่มหัวข้อ "ปรับปรุงระบบแชท (Chat System)"
