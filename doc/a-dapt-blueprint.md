@@ -38,6 +38,8 @@
 | FR-05 | Admin สามารถกรองรายงานตามประเภท/ความสำคัญ/สถานะ | Must Have |
 | FR-06 | Admin สามารถอัปเดตสถานะ + เพิ่มหมายเหตุได้ | Must Have |
 | FR-07 | Admin เห็นแผนที่ + รูปภาพในหน้ารายละเอียด | Should Have |
+| FR-08 | ผู้ใช้และ Admin สามารถแชทคุยกันได้แบบ Real-time | Should Have |
+| FR-09 | ระบบต้องบันทึกประวัติการแชท | Must Have |
 
 ---
 
@@ -48,21 +50,21 @@
 ```
 ┌──────────┐       ┌──────────┐
 │   User   │──1:N──│  Report  │
-└──────────┘       └──────────┘
-                        │
-                   ┌────┴────┐
-                   │ Fields  │
-                   ├─────────┤
-                   │ id       │
-                   │ userId   │
-                   │ incidentType (enum) │
-                   │ priority (enum)     │
-                   │ title    │
-                   │ description │
-                   │ location (JSON)     │
-                   │ imageUrl │
-                   │ status (enum)       │
-                   │ adminNote│
+└──────────┘       └──────────┘──1:N──┌──────────┐
+                        │             │  Message │
+                   ┌────┴────┐        └──────────┘
+                   │ Fields  │             │
+                   ├─────────┤        ┌────┴────┐
+                   │ id       │       │ Fields  │
+                   │ userId   │       ├─────────┤
+                   │ incidentType (enum) │ id    │
+                   │ priority (enum)     │ reportId │
+                   │ title    │       │ senderId │
+                   │ description │    │ content  │
+                   │ location (JSON)     │ readAt   │
+                   │ imageUrl │       │ createdAt│
+                   │ status (enum)       │ updatedAt│
+                   │ adminNote│       └─────────┘
                    │ createdAt│
                    │ updatedAt│
                    └─────────┘
@@ -86,7 +88,14 @@ Client (Nuxt.js)
     ├──GET  /api/reports/admin────────┤
     ├──GET  /api/reports/admin/:id────┤  → Express Router
     ├──PUT  /api/reports/admin/:id────┤     → Middleware (auth, upload, validate)
-    └──DELETE /api/reports/admin/:id──┘        → Controller → Service → Prisma → PostgreSQL
+    ├──DELETE /api/reports/admin/:id──┘        → Controller → Service → Prisma → PostgreSQL
+    │
+    ├──Socket.IO (Real-time Chat)─────┐
+    │   ├── connect / disconnect      │
+    │   ├── join_room / leave_room    │
+    │   ├── send_message              │
+    │   └── typing                    │
+    └─────────────────────────────────┘
 ```
 
 ### Technology Stack
@@ -97,6 +106,7 @@ Client (Nuxt.js)
 | Backend | Express.js, Multer (file upload), Zod (validation) |
 | Database | PostgreSQL 16 + Prisma ORM |
 | Storage | Cloudinary (image hosting) |
+| Real-time | Socket.IO |
 | Auth | JWT (Bearer Token) |
 
 ---
@@ -110,10 +120,13 @@ backend/
 ├── prisma/
 │   └── schema.prisma              ← Data model + enums
 ├── src/
+│   ├── socket.js                  ← Socket.IO setup & logic
 │   ├── controllers/
 │   │   └── report.controller.js   ← Request handling + Cloudinary upload
+│   │   └── chat.controller.js     ← Chat history API
 │   ├── services/
 │   │   └── report.service.js      ← Business logic + Prisma queries
+│   │   └── chat.service.js        ← Chat logic
 │   ├── validations/
 │   │   └── report.validation.js   ← Zod schemas
 │   ├── routes/
@@ -149,6 +162,8 @@ Admin Login → /admin/reports → กรอง/ค้นหา → คลิก
                                                  อัปเดตสถานะ + หมายเหตุ → บันทึก
                                                         ↓
                                              User เห็นสถานะ + หมายเหตุอัปเดต
+                                                        ↓
+                                          (Optional) User & Admin แชทคุยรายละเอียดเพิ่มเติม
 ```
 
 ### Migration Process
@@ -158,6 +173,7 @@ Admin Login → /admin/reports → กรอง/ค้นหา → คลิก
 | 1 | `add_report_model` | สร้าง table Report + ReportCategory enum |
 | 2 | `add_incident_type_priority_location_image` | เปลี่ยน category → incidentType, เพิ่ม priority/location/imageUrl |
 | 3 | `make_location_required` | บังคับ location ต้องมีค่า |
+| 4 | `add_chat_message` | สร้าง table Message เชื่อมกับ Report |
 
 ---
 

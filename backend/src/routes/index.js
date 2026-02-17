@@ -8,6 +8,7 @@ const bookingRoutes = require('./booking.routes');
 const notificationRoutes = require('./notification.routes')
 const mapRoutes = require('./maps.routes')
 const reportRoutes = require('./report.routes')
+const chatRoutes = require('./chat.routes')
 
 const router = express.Router();
 
@@ -20,5 +21,7 @@ router.use('/bookings', bookingRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/api/maps', mapRoutes);
 router.use('/reports', reportRoutes);
+router.use('/chat', chatRoutes);
 
 module.exports = router;
+

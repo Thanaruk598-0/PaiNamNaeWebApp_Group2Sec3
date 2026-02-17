@@ -1,5 +1,18 @@
 # 📝 Change Log — Incident Report System
 
+
+## [1.0.1] — 2026-02-18
+
+### 🚀 Improved (ปรับปรุง)
+- **User Chat:** แก้ไขปัญหา Real-time Update โดยให้ Socket Join Room ทันทีที่เชื่อมต่อสำเร็จ
+- **Admin Chat:** แก้ไขปัญหา Socket ไม่ Join Room เมื่อเปลี่ยนหน้ารายงาน (Multiplexing Fix)
+- **Chat Limit:** เพิ่มจำกัดความยาวข้อความแชทจาก 2,000 เป็น 5,000 ตัวอักษร
+- **Admin Chat UI:** ปรับเปลี่ยนธีมสีของหน้าแชทฝั่ง Admin ให้เป็นสีน้ำเงิน (Blue Theme) ตาม Design System ใหม่
+
+### 📝 Documentation
+- **README_phuchit.md:** เพิ่มหัวข้อ "ปรับปรุงระบบแชท (Chat System)"
+- **a-dapt-blueprint.md:** อัปเดตข้อมูล Functional Requirements, Entity Relationship และ API Architecture ของระบบแชท
+
 ## [1.0.0] — 2026-02-16
 
 ### ✨ Added (เพิ่มใหม่)

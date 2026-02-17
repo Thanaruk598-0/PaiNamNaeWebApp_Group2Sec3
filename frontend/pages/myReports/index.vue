@@ -210,6 +210,10 @@
                             </div>
                             <div class="text-right shrink-0">
                                 <p class="text-xs text-gray-400">{{ formatDate(r.createdAt) }}</p>
+                                <button @click="openChat(r.id)"
+                                    class="mt-2 px-3 py-1 text-xs bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                                    <i class="fas fa-comment-dots mr-1"></i>แชท
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -229,13 +233,59 @@
                 <img :src="lightboxUrl" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl object-contain" />
             </div>
         </div>
+
+        <!-- Chat Overlay -->
+        <div v-if="isChatOpen"
+            class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            @click.self="closeChat">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col h-[80vh]">
+                <div class="px-4 py-3 border-b flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-800">
+                        <i class="fas fa-comment-dots mr-2 text-blue-500"></i>แชทรายงาน #{{ activeReportId?.substring(0, 8) }}
+                    </h3>
+                    <button @click="closeChat" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-xmark text-xl"></i>
+                    </button>
+                </div>
+                <div ref="chatContainer" class="flex-1 p-4 overflow-y-auto space-y-4 chat-container">
+                    <div v-for="msg in chatMessages" :key="msg.id"
+                        :class="['flex', msg.senderId === user.id ? 'justify-end' : 'justify-start']">
+                        <div :class="[
+                            'max-w-[70%]',
+                            'p-3 rounded-lg shadow-sm',
+                            msg.senderId === user.id
+                                ? 'bg-blue-500 text-white rounded-br-none'
+                                : 'bg-gray-200 text-gray-800 rounded-bl-none'
+                        ]">
+                            <p class="text-sm">{{ msg.content }}</p>
+                            <p :class="['text-xs mt-1', msg.senderId === user.id ? 'text-blue-200' : 'text-gray-500']">
+                                {{ formatDate(msg.createdAt) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t flex items-center gap-2">
+                    <input v-model="chatInput" @keyup.enter="sendMessage" type="text" placeholder="พิมพ์ข้อความ..." maxlength="5000"
+                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    <button @click="sendMessage" :disabled="!chatInput.trim() || isSendingMessage"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                        <i class="fas fa-paper-plane" v-if="!isSendingMessage"></i>
+                        <i class="fas fa-spinner fa-spin" v-else></i>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useCookie, useRuntimeConfig } from '#app'
+import { ref, onMounted, computed, watch, nextTick, onUnmounted } from 'vue'
+import { useRuntimeConfig, useCookie } from '#app'
+import { useAuth } from '~/composables/useAuth'
+import { useToast } from '~/composables/useToast'
+import { io } from 'socket.io-client'
 import dayjs from 'dayjs'
+import 'dayjs/locale/th'
 import 'dayjs/locale/th'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
 
@@ -256,6 +306,152 @@ const submitError = ref('')
 const submitSuccess = ref(false)
 const reports = ref([])
 const lightboxUrl = ref(null)
+
+// Chat
+const { user } = useAuth() // Get user for senderId check
+const chatSocket = ref(null)
+const activeReportId = ref(null)
+const isChatOpen = ref(false)
+const chatMessages = ref([]) // Local messages state
+const chatInput = ref('')
+const isSendingMessage = ref(false)
+const chatContainer = ref(null)
+
+// --- Chat Functions (Mirrored from Admin) ---
+const { toast } = useToast()
+
+function initChatSocket() {
+    const token = getToken()
+    if (!token) return
+
+    if (chatSocket.value?.connected) return
+
+    // Use apiBase logic like Admin
+    chatSocket.value = io(config.public.apiBase.replace('/api/', ''), {
+        auth: { token },
+        transports: ['websocket', 'polling']
+    })
+
+    chatSocket.value.on('connect', () => {
+        console.log('Chat connected')
+        if (activeReportId.value) {
+            chatSocket.value.emit('join_room', activeReportId.value)
+        }
+    })
+
+    chatSocket.value.on('connect_error', (err) => {
+        console.error('Chat connection error:', err)
+        toast.error('ไม่สามารถเชื่อมต่อแชทได้: ' + err.message)
+    })
+
+    chatSocket.value.on('new_message', (msg) => {
+        // Only append if it belongs to current open report
+        if (activeReportId.value && msg.reportId === activeReportId.value) {
+            chatMessages.value.push(msg)
+            scrollToBottom()
+        }
+    })
+}
+
+function openChat(reportId) {
+    activeReportId.value = reportId
+    isChatOpen.value = true
+    chatMessages.value = [] // Clear old messages
+    
+    // Ensure socket is connected
+    initChatSocket()
+    
+    // Join room
+    if (chatSocket.value && chatSocket.value.connected) {
+        chatSocket.value.emit('join_room', reportId)
+    } else {
+        // If not connected yet, it will auto-connect. 
+        // We can listen for connect event, but usually it's fast.
+        // Or we can just emit in the init's connect handler?
+        // Simpler: Just try emit. If not connected, it buffers or we handle in fetch
+    }
+
+    fetchChatMessages(reportId)
+    setTimeout(scrollToBottom, 100)
+}
+
+function closeChat() {
+    if (activeReportId.value && chatSocket.value) {
+        chatSocket.value.emit('leave_room', activeReportId.value)
+    }
+    isChatOpen.value = false
+    activeReportId.value = null
+}
+
+async function fetchChatMessages(reportId) {
+    try {
+        const token = getToken()
+        const res = await fetch(`${config.public.apiBase}chat/${reportId}/messages`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        const body = await res.json()
+        if (body.status === 'success') {
+            chatMessages.value = body.data || []
+            scrollToBottom()
+        }
+    } catch (err) {
+        console.error('Fetch chat error:', err)
+    }
+}
+
+async function sendMessage() {
+    if (!chatInput.value.trim() || isSendingMessage.value) return
+
+    isSendingMessage.value = true
+    try {
+        const token = getToken()
+        const reportId = activeReportId.value
+
+        // Use Socket if connected
+        if (chatSocket.value?.connected) {
+            chatSocket.value.emit('send_message', {
+                reportId,
+                content: chatInput.value
+            }, (response) => {
+                isSendingMessage.value = false
+                if (response.status === 'ok') {
+                    chatInput.value = ''
+                    // msg added via event listener 'new_message'
+                } else {
+                    toast.error('ส่งข้อความไม่สำเร็จ: ' + (response.message || 'เกิดข้อผิดพลาด'))
+                }
+            })
+        } else {
+            // Fallback REST
+            const res = await fetch(`${config.public.apiBase}chat/${reportId}/messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ content: chatInput.value })
+            })
+            const body = await res.json()
+            if (!res.ok) throw new Error(body.message || 'ส่งข้อความไม่สำเร็จ')
+            chatMessages.value.push(body.data)
+            chatInput.value = ''
+            isSendingMessage.value = false
+            scrollToBottom()
+        }
+    } catch (err) {
+        console.error('Send message error:', err)
+        isSendingMessage.value = false
+        toast.error('ส่งข้อความไม่สำเร็จ: ' + err.message)
+    }
+}
+
+function scrollToBottom() {
+    nextTick(() => {
+        if (chatContainer.value) {
+            chatContainer.value.scrollTop = chatContainer.value.scrollHeight
+        }
+    })
+}
 
 // Image
 const imageFile = ref(null)
@@ -519,6 +715,7 @@ onMounted(() => {
 
 onUnmounted(() => {
     if (window[GMAPS_CB]) delete window[GMAPS_CB]
+    if (chatSocket.value) chatSocket.value.disconnect()
 })
 </script>
 

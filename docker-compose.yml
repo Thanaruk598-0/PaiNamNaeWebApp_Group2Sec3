@@ -2,17 +2,18 @@ version: '3.8'
 
 services:
   db:
-    image: postgres:16-alpine
+    image: mysql:8.0
     container_name: painamnae_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: painamnae_user
-      POSTGRES_PASSWORD: painamnae_pass
-      POSTGRES_DB: painamnae_db
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: painamnae_db
+      MYSQL_USER: painamnae_user
+      MYSQL_PASSWORD: painamnae_pass
     ports:
-      - "5433:5432"
+      - "3307:3306"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - mysql_data:/var/lib/mysql
 
 volumes:
-  pgdata:
+  mysql_data:

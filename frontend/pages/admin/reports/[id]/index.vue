@@ -181,6 +181,68 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Chat Section -->
+                    <div class="bg-white rounded-lg border border-gray-300 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-500 flex items-center justify-between">
+                            <h2 class="text-lg font-semibold text-white">
+                                <i class="fas fa-comments mr-2"></i>แชทกับผู้แจ้ง
+                            </h2>
+                        </div>
+                        
+                        <div class="flex flex-col h-[500px]">
+                            <!-- Chat Messages -->
+                            <div ref="chatRef" class="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50">
+                                <div v-if="chatMessages.length === 0" class="flex flex-col items-center justify-center h-full text-gray-400">
+                                    <i class="fas fa-comment-slash text-4xl mb-2"></i>
+                                    <p>ยังไม่มีการสนทนา</p>
+                                </div>
+                                
+                                <div v-for="msg in chatMessages" :key="msg.id" 
+                                     class="flex flex-col"
+                                     :class="msg.senderId === user?.id ? 'items-end' : 'items-start'">
+                                    
+                                    <div class="max-w-[80%] rounded-lg px-4 py-2 text-sm shadow-sm relative group"
+                                         :class="msg.senderId === user?.id 
+                                            ? 'bg-blue-600 text-white rounded-br-none' 
+                                            : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'">
+                                        
+                                        <p>{{ msg.content }}</p>
+                                        
+                                        <!-- Timestamp -->
+                                        <div class="text-[10px] mt-1 flex items-center gap-1"
+                                             :class="msg.senderId === user?.id ? 'text-blue-100 justify-end' : 'text-gray-400'">
+                                            {{ dayjs(msg.createdAt).format('HH:mm') }}
+                                            <i v-if="msg.senderId === user?.id && msg.readAt" class="fas fa-check-double ml-1"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Sender Name (if not me) -->
+                                    <span v-if="msg.senderId !== user?.id" class="text-xs text-gray-500 mt-1 ml-1">
+                                        {{ report.user?.firstName || 'ผู้ใช้งาน' }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Input Area -->
+                            <div class="p-4 bg-white border-t border-gray-200">
+                                <form @submit.prevent="sendMessage" class="flex gap-2">
+                                    <input v-model="chatInput" 
+                                        type="text" 
+                                        placeholder="พิมพ์ข้อความ... (กด Enter เพื่อส่ง)" 
+                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                                        :disabled="isSendingMessage" maxlength="5000" />
+                                    
+                                    <button type="submit" 
+                                        class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
+                                        :disabled="!chatInput.trim() || isSendingMessage">
+                                        <i class="fas fa-paper-plane" v-if="!isSendingMessage"></i>
+                                        <i class="fas fa-spinner fa-spin" v-else></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </main>
@@ -212,6 +274,8 @@ import buddhistEra from 'dayjs/plugin/buddhistEra'
 import AdminHeader from '~/components/admin/AdminHeader.vue'
 import AdminSidebar from '~/components/admin/AdminSidebar.vue'
 import { useToast } from '~/composables/useToast'
+import { useAuth } from '~/composables/useAuth'
+import { io } from 'socket.io-client'
 
 dayjs.locale('th')
 dayjs.extend(buddhistEra)
@@ -232,6 +296,14 @@ const report = ref(null)
 const editForm = ref({ status: '', adminNote: '' })
 const lightboxUrl = ref(null)
 const detailMapContainer = ref(null)
+
+// Chat
+const { user } = useAuth()
+const chatSocket = ref(null)
+const chatMessages = ref([])
+const chatInput = ref('')
+const isSendingMessage = ref(false)
+const chatRef = ref(null)
 
 const GMAPS_CB = '__initDetailMap__'
 
@@ -476,12 +548,118 @@ function cleanupGlobalScripts() {
 onMounted(() => {
     defineGlobalScripts()
     if (typeof window.__adminResizeHandler__ === 'function') window.__adminResizeHandler__()
+    defineGlobalScripts()
+    if (typeof window.__adminResizeHandler__ === 'function') window.__adminResizeHandler__()
     fetchReport()
+    initChat()
 })
 onUnmounted(() => {
     cleanupGlobalScripts()
     if (window[GMAPS_CB]) delete window[GMAPS_CB]
+    cleanupGlobalScripts()
+    if (window[GMAPS_CB]) delete window[GMAPS_CB]
+    
+    if (chatSocket.value) {
+        chatSocket.value.disconnect()
+    }
 })
+
+// --- Chat Functions ---
+function initChat() {
+    // Connect Socket
+    const token = getToken()
+    if (!token) return
+
+    chatSocket.value = io(config.public.apiBase.replace('/api/', ''), {
+        auth: { token },
+        transports: ['websocket', 'polling']
+    })
+
+    chatSocket.value.on('connect', () => {
+        console.log('Chat connected')
+        chatSocket.value.emit('join_room', reportId)
+    })
+
+    // FIX: Join room if already connected (multiplexing)
+    if (chatSocket.value.connected) {
+        chatSocket.value.emit('join_room', reportId)
+    }
+
+    chatSocket.value.on('new_message', (msg) => {
+        if (msg.reportId === reportId) {
+            chatMessages.value.push(msg)
+            scrollToBottom()
+        }
+    })
+
+    fetchChatMessages()
+}
+
+async function fetchChatMessages() {
+    try {
+        const token = getToken()
+        const res = await fetch(`${config.public.apiBase}chat/${reportId}/messages`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        const body = await res.json()
+        if (body.status === 'success') {
+            chatMessages.value = body.data || []
+            scrollToBottom()
+        }
+    } catch (err) {
+        console.error('Fetch chat error:', err)
+    }
+}
+
+async function sendMessage() {
+    if (!chatInput.value.trim() || isSendingMessage.value) return
+
+    isSendingMessage.value = true
+    try {
+        const token = getToken()
+        // Use Socket if connected
+        if (chatSocket.value?.connected) {
+            chatSocket.value.emit('send_message', {
+                reportId,
+                content: chatInput.value
+            }, (response) => {
+                isSendingMessage.value = false
+                if (response.status === 'ok') {
+                    chatInput.value = ''
+                    // msg added via event
+                }
+            })
+        } else {
+            // Fallback REST
+            const res = await fetch(`${config.public.apiBase}chat/${reportId}/messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ content: chatInput.value })
+            })
+            const body = await res.json()
+            if (!res.ok) throw new Error(body.message)
+            chatMessages.value.push(body.data)
+            chatInput.value = ''
+            isSendingMessage.value = false
+            scrollToBottom()
+        }
+    } catch (err) {
+        console.error('Send message error:', err)
+        isSendingMessage.value = false
+        toast.error('ส่งข้อความไม่สำเร็จ', err.message)
+    }
+}
+
+function scrollToBottom() {
+    nextTick(() => {
+        if (chatRef.value) {
+            chatRef.value.scrollTop = chatRef.value.scrollHeight
+        }
+    })
+}
 </script>
 
 <style>

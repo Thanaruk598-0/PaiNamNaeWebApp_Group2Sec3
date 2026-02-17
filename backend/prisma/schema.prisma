@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -170,7 +170,7 @@ model Vehicle {
   vehicleType   String
   color         String
   seatCapacity  Int
-  amenities     String[]
+  amenities     Json     @db.Json
   photos        Json?    @db.Json
   isDefault     Boolean  @default(false)
   createdAt     DateTime @default(now())
@@ -250,10 +250,24 @@ model Report {
   adminNote    String?
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
+  messages     ChatMessage[]
 
   @@index([userId])
   @@index([status])
   @@index([incidentType])
   @@index([priority])
   @@index([createdAt])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  reportId  String
+  report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  senderId  String
+  content   String   @db.Text
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([reportId, createdAt])
+  @@index([senderId])
 }

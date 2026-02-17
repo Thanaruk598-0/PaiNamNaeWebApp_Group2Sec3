@@ -10,16 +10,17 @@
 
 | รายการ | ค่า |
 |--------|-----|
-| Database | PostgreSQL 16 (Alpine) |
+| Database | MySQL 8.0 |
 | Host | localhost |
-| Port | **5433** (เปลี่ยนจาก 5432 เพราะมี PostgreSQL ตัวอื่นรันอยู่แล้ว) |
+| Port | **3307** (เปลี่ยนจาก 3306 เพื่อไม่ให้ชนกับ MySQL ตัวอื่นที่รันอยู่แล้ว) |
 | Database Name | painamnae_db |
 | Username | painamnae_user |
 | Password | painamnae_pass |
+| Root Password | rootpassword |
 
 ### DATABASE_URL
 ```
-postgresql://painamnae_user:painamnae_pass@localhost:5433/painamnae_db?schema=public
+mysql://painamnae_user:painamnae_pass@localhost:3307/painamnae_db
 ```
 
 ---
@@ -42,24 +43,22 @@ npx prisma migrate dev --name init
 ```
 สร้างตารางทั้งหมดในฐานข้อมูลตาม schema ที่กำหนดไว้ใน `prisma/schema.prisma`
 
-### 4. เชื่อมต่อ Database ผ่าน pgAdmin 4
-1. เปิด **pgAdmin 4**
-2. **คลิกขวา** ที่ **Servers** → **Register** → **Server...**
-3. แท็บ **General**:
-   - **Name:** `PaiNamNae Docker`
-4. แท็บ **Connection**:
+### 4. เชื่อมต่อ Database ผ่าน MySQL Workbench
+1. เปิด **MySQL Workbench**
+2. คลิก **+** เพื่อเพิ่ม Connection ใหม่
+3. กรอกข้อมูล:
 
    | ช่อง | ค่า |
    |------|-----|
-   | Host name/address | `localhost` |
-   | Port | `5433` |
-   | Maintenance database | `painamnae_db` |
+   | Connection Name | `PaiNamNae Docker` |
+   | Hostname | `localhost` |
+   | Port | `3307` |
    | Username | `painamnae_user` |
-   | Password | `painamnae_pass` |
-   | ☑ Save password | ติ๊กเลือก |
+   | Password | `painamnae_pass` (กด Store in Vault) |
+   | Default Schema | `painamnae_db` |
 
-5. กด **Save**
-6. ดูตารางได้ที่ **Databases → painamnae_db → Schemas → public → Tables**
+4. กด **Test Connection** เพื่อทดสอบ → กด **OK**
+5. ดูตารางได้ที่ **Schemas → painamnae_db → Tables**
 
 ### 5. รัน Backend Server
 ```bash
@@ -124,9 +123,9 @@ cd backend && npm run dev
 
 | ไฟล์ | คำอธิบาย |
 |------|----------|
-| `docker-compose.yml` | ตั้งค่า PostgreSQL container |
+| `docker-compose.yml` | ตั้งค่า MySQL container |
 | `backend/.env` | เก็บ DATABASE_URL และ config ต่างๆ |
-| `backend/prisma/schema.prisma` | โครงสร้างฐานข้อมูล (Prisma Schema) |
+| `backend/prisma/schema.prisma` | โครงสร้างฐานข้อมูล (Prisma Schema, provider: mysql) |
 
 ---
 
@@ -277,5 +276,6 @@ cd backend && npm run dev
 3. **พัฒนา Frontend Pages** — ช่วยเขียนหน้า Vue.js สำหรับ User (My Reports: ฟอร์มสร้างรายงาน, Google Maps ปักหมุด, อัปโหลดรูปภาพ) และ Admin (Report Management: ตารางรายงาน, ฟิลเตอร์, หน้ารายละเอียดรายงาน)
 4. **ปรับปรุง UI Components** — ช่วยปรับ AdminHeader (เพิ่ม Profile Dropdown), AdminSidebar (เพิ่มเมนู Report), และ Navbar (เพิ่มลิงก์แจ้งเหตุการณ์)
 5. **แก้ไขข้อผิดพลาด (Debugging)** — ช่วยวิเคราะห์และแก้ไขปัญหาต่างๆ เช่น Prisma Client EPERM, Cloudinary URL mismatch, Google Maps loading timing issue, และ missing user fields after save
+6. **ปรับปรุงระบบแชท (Chat System)** — แก้ไขปัญหา Real-time Update ของผู้ใช้ (Socket Join Room Issue) และปรับสีธีมของ Admin Chat ให้เป็นสีน้ำเงินตาม Design System
 
 โดยข้าพเจ้าได้ตรวจสอบความถูกต้องและแก้ไขข้อผิดพลาดอันเนื่องมาจากผลลัพธ์จากปัญญาประดิษฐ์เรียบร้อยแล้ว
