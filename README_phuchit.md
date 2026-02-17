@@ -95,6 +95,16 @@ ADMIN_LAST_NAME=Champachon
 
 ---
 
+### ⚠️ หมายเหตุเกี่ยวกับ Git (Git Warnings)
+หากพบคำเตือน `warning: in the working copy of '...', LF will be replaced by CRLF` เมื่อรัน `git add .`
+- **สาเหตุ:** เกิดจากความแตกต่างของ Line Endings ระหว่าง Windows (CRLF) และ macOS/Linux (LF)
+- **การแก้ไข:** ไม่ส่งผลกระทบต่อการทำงานของโปรแกรม สามารถ commit ได้ตามปกติ หรือตั้งค่า git config:
+  ```bash
+  git config --global core.autocrlf true
+  ```
+
+---
+
 ## 📋 คำสั่งที่ใช้บ่อย
 
 ```bash
