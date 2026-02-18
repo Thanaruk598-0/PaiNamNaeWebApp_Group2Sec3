@@ -471,31 +471,28 @@ const pagedBookings = computed(() => {
 
 /* ---------- fetch API (token) ---------- */
 async function fetchBookings() {
-    isLoading.value = true
-    loadError.value = ''
-    try {
-        const token = useCookie('token').value || (process.client ? localStorage.getItem('token') : '')
-        const res = await fetch('http://localhost:3000/api/bookings/admin', {
-            headers: {
-                Accept: 'application/json',
-                ...(token ? { Authorization: `Bearer ${token}` } : {})
-            },
-            credentials: 'include'
-        })
-        const body = await res.json()
-        if (!res.ok) throw new Error(body?.message || `Request failed: ${res.status}`)
-        bookingsAll.value = Array.isArray(body?.data) ? body.data : []
-        // reset pagination when new data arrives
-        pagination.page = 1
-        applyFilters()
-    } catch (err) {
-        console.error(err)
-        loadError.value = err?.message || 'ไม่สามารถโหลดข้อมูลได้'
-        toast.error('เกิดข้อผิดพลาด', loadError.value)
-        bookingsAll.value = []
-    } finally {
-        isLoading.value = false
-    }
+  isLoading.value = true
+  loadError.value = ''
+  try {
+    const { $api } = useNuxtApp()
+
+    // plugin จะใส่ Authorization จาก cookie ให้ + baseURL ไป Railway ให้
+    const data = await $api('/bookings/admin')
+
+    // plugin ของคุณ onResponse จะ unwrap .data ให้แล้ว
+    // ดังนั้น data ตรงนี้ควรเป็น array ของ bookings เลย
+    bookingsAll.value = Array.isArray(data) ? data : []
+
+    pagination.page = 1
+    applyFilters()
+  } catch (err) {
+    console.error(err)
+    loadError.value = err?.statusMessage || err?.message || 'ไม่สามารถโหลดข้อมูลได้'
+    toast.error('เกิดข้อผิดพลาด', loadError.value)
+    bookingsAll.value = []
+  } finally {
+    isLoading.value = false
+  }
 }
 
 function changePage(next) {

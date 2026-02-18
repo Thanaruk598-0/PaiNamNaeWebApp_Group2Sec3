@@ -199,7 +199,7 @@ model Route {
   status          RouteStatus @default(AVAILABLE)
   cancelledAt     DateTime?
   cancelledBy     String?     // 'DRIVER' | 'ADMIN'
-  routePolyline String?
+  routePolyline String? @db.Text
   distanceMeters Int?
   durationSeconds Int?
   routeSummary    String?
