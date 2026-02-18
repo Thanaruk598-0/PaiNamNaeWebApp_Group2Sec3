@@ -1,3 +1,14 @@
+### รายชื่อสมาชิกกลุ่ม Group2_Sec3
+| ชื่อ-นามสกุล | รหัสนักศึกษา | GitHub Username |
+|---|---|---|
+| ธรรมพล สาผิว | 653380202-0 | pyrosixth1 |
+| ณิชากานต์ คนกลาง | 663380384-9 | SeroX5 |
+| พงศ์วิรัญจ์ จันทะฟอง | 663380391-2 | PJ-113 |
+| ศุภกฤต สังข์มณีวงศ์ | 663380403-1 | SuphakritCs |
+| กิตติพศ สวัสดิไชย | 663380589-1 | kittipott |
+| ธนารักษ์ ทรัพย์สิริชล | 663380598-0 | Thanaruk598-0 |
+| ภูชิต จำปาชน | 663380611-4 | phuchit111 |
+
 # Pai Nam Nae - A Safe Ride Sharing App
 
 <!-- A safe ride-sharing application with a **Nuxt.js** frontend and **Express.js** backend, powered by **Prisma** ORM and **PostgreSQL**. -->
