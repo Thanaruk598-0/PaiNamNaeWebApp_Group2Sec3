@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.1 (Python 3.12.8 on win32)" generated="2026-02-18T18:50:04.011624" rpa="false" schemaversion="5">
+<suite id="s1" name="Tc15" source="C:\SE_Sprint1.1\PaiNamNaeWebApp_Group2Sec3\Test-UAT Code &amp; Result\TS011\tc15.robot">
+<kw name="Open Browser To Login Page" type="SETUP">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:04.194354" level="INFO">Opening browser 'chrome' to base url 'https://www.csse3269.cpkku.com/login'.</msg>
+<arg>${URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-02-18T18:50:04.194354" elapsed="1.686004"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-02-18T18:50:05.881358" elapsed="0.033493"/>
+</kw>
+<kw name="Set Selenium Speed" owner="SeleniumLibrary">
+<arg>1s</arg>
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<status status="PASS" start="2026-02-18T18:50:05.915857" elapsed="0.000000"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:06.974998" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="notify_login_open.png"&gt;&lt;img src="notify_login_open.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>notify_login_open.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T18:50:05.915857" elapsed="1.059141"/>
+</kw>
+<status status="PASS" start="2026-02-18T18:50:04.193279" elapsed="2.782823"/>
+</kw>
+<test id="s1-t1" name="Verify User Receives Status Update Notification" line="14">
+<kw name="Login As User">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id=identifier</arg>
+<arg>15s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-02-18T18:50:06.976102" elapsed="2.015435"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:10.063198" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="notify_login_page.png"&gt;&lt;img src="notify_login_page.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>notify_login_page.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T18:50:08.991537" elapsed="1.071661"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:10.063198" level="INFO">Typing text 'Kren_123' into text field 'id=identifier'.</msg>
+<arg>id=identifier</arg>
+<arg>${USERNAME}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-18T18:50:10.063198" elapsed="3.103506"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:13.166704" level="INFO">Typing text 'abcd1234' into text field 'xpath=//input[@type="password"]'.</msg>
+<arg>xpath=//input[@type="password"]</arg>
+<arg>${PASSWORD}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-18T18:50:13.166704" elapsed="3.073893"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:17.314997" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="notify_login_filled.png"&gt;&lt;img src="notify_login_filled.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>notify_login_filled.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T18:50:16.240597" elapsed="1.074400"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:17.316009" level="INFO">Clicking element 'xpath=//button[@type="submit"]'.</msg>
+<arg>xpath=//button[@type="submit"]</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-18T18:50:17.316009" elapsed="2.042754"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>csse3269</arg>
+<arg>15s</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-02-18T18:50:19.358763" elapsed="1.004803"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:21.435266" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="notify_home_loaded.png"&gt;&lt;img src="notify_home_loaded.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>notify_home_loaded.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T18:50:20.363566" elapsed="1.071700"/>
+</kw>
+<status status="PASS" start="2026-02-18T18:50:06.976102" elapsed="14.459164"/>
+</kw>
+<kw name="Open Notification Panel">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//button//*[name()='svg']</arg>
+<arg>15s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-02-18T18:50:21.436276" elapsed="2.020644"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:24.565392" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="notify_before_click_bell.png"&gt;&lt;img src="notify_before_click_bell.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>notify_before_click_bell.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T18:50:23.456920" elapsed="1.108472"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:24.565874" level="INFO">Clicking element 'xpath=//button//*[name()='svg']'.</msg>
+<arg>xpath=//button//*[name()='svg']</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-18T18:50:24.565392" elapsed="2.054741"/>
+</kw>
+<kw name="Wait Until Keyword Succeeds" owner="BuiltIn">
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:28.640662" level="INFO">Current page contains text 'อัปเดตสถานะรายงาน'.</msg>
+<arg>อัปเดตสถานะรายงาน</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-02-18T18:50:26.621145" elapsed="2.019517"/>
+</kw>
+<arg>20s</arg>
+<arg>2s</arg>
+<arg>Page Should Contain</arg>
+<arg>อัปเดตสถานะรายงาน</arg>
+<doc>Runs the specified keyword and retries if it fails.</doc>
+<status status="PASS" start="2026-02-18T18:50:26.620133" elapsed="2.020529"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:29.750876" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="notify_dropdown_open.png"&gt;&lt;img src="notify_dropdown_open.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>notify_dropdown_open.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T18:50:28.640662" elapsed="1.111214"/>
+</kw>
+<status status="PASS" start="2026-02-18T18:50:21.436276" elapsed="8.315600"/>
+</kw>
+<kw name="Verify Status Update Notification">
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:31.767703" level="INFO">Current page contains text 'อัปเดตสถานะรายงาน'.</msg>
+<arg>อัปเดตสถานะรายงาน</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-02-18T18:50:29.751876" elapsed="2.015827"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T18:50:32.868282" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="notify_title_verified.png"&gt;&lt;img src="notify_title_verified.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>notify_title_verified.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T18:50:31.767703" elapsed="1.100579"/>
+</kw>
+<status status="PASS" start="2026-02-18T18:50:29.751876" elapsed="3.116406"/>
+</kw>
+<status status="PASS" start="2026-02-18T18:50:06.976102" elapsed="25.893180"/>
+</test>
+<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-02-18T18:50:32.870281" elapsed="3.104568"/>
+</kw>
+<status status="PASS" start="2026-02-18T18:50:04.013130" elapsed="31.961719"/>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Tc15" id="s1" pass="1" fail="0" skip="0">Tc15</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
