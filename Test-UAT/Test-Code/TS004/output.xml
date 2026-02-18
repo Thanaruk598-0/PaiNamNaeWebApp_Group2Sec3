@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.1 (Python 3.12.8 on win32)" generated="2026-02-18T13:52:31.090121" rpa="false" schemaversion="5">
+<suite id="s1" name="Tc05" source="C:\SE_Sprint1\Test\TS00-4\tc05.robot">
+<kw name="Open Browser To Login Page" type="SETUP">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:31.231216" level="INFO">Opening browser 'chrome' to base url 'http://localhost:3001/login'.</msg>
+<arg>${URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-02-18T13:52:31.230208" elapsed="1.482908"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-02-18T13:52:32.713116" elapsed="0.028878"/>
+</kw>
+<kw name="Set Selenium Speed" owner="SeleniumLibrary">
+<arg>1s</arg>
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<status status="PASS" start="2026-02-18T13:52:32.741994" elapsed="0.001000"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:33.961267" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_login_open.png"&gt;&lt;img src="admin_view_login_open.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_login_open.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:52:32.742994" elapsed="1.218273"/>
+</kw>
+<status status="PASS" start="2026-02-18T13:52:31.230208" elapsed="2.732063"/>
+</kw>
+<test id="s1-t1" name="Verify Admin Can View Submitted Reports" line="14">
+<kw name="Login To System">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id=identifier</arg>
+<arg>15s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-02-18T13:52:33.962271" elapsed="2.016982"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:37.041599" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_login_page.png"&gt;&lt;img src="admin_view_login_page.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_login_page.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:52:35.979253" elapsed="1.062346"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:37.042601" level="INFO">Typing text 'admin123' into text field 'id=identifier'.</msg>
+<arg>id=identifier</arg>
+<arg>${USERNAME}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-18T13:52:37.042601" elapsed="3.063626"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:40.106227" level="INFO">Typing text '123456789' into text field 'xpath=//input[@type="password"]'.</msg>
+<arg>xpath=//input[@type="password"]</arg>
+<arg>${PASSWORD}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-18T13:52:40.106227" elapsed="3.053749"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:44.219401" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_login_filled.png"&gt;&lt;img src="admin_view_login_filled.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_login_filled.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:52:43.159976" elapsed="1.059425"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:44.219401" level="INFO">Clicking element 'xpath=//button[normalize-space()="เข้าสู่ระบบ"]'.</msg>
+<arg>xpath=//button[normalize-space()="เข้าสู่ระบบ"]</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-02-18T13:52:44.219401" elapsed="2.038136"/>
+</kw>
+<kw name="Wait Until Element Is Not Visible" owner="SeleniumLibrary">
+<arg>id=identifier</arg>
+<arg>15s</arg>
+<doc>Waits until the element ``locator`` is not visible.</doc>
+<status status="PASS" start="2026-02-18T13:52:46.257537" elapsed="1.005831"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:48.372989" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_login_success.png"&gt;&lt;img src="admin_view_login_success.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_login_success.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:52:47.263368" elapsed="1.110621"/>
+</kw>
+<status status="PASS" start="2026-02-18T13:52:33.962271" elapsed="14.411718"/>
+</kw>
+<kw name="Go To Report Management">
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:48.373989" level="INFO">Opening url 'http://localhost:3001/admin/reports'</msg>
+<arg>http://localhost:3001/admin/reports</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-02-18T13:52:48.373989" elapsed="1.417459"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>reports</arg>
+<arg>10s</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-02-18T13:52:49.791448" elapsed="1.008764"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:51.872655" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_reports_page.png"&gt;&lt;img src="admin_view_reports_page.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_reports_page.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:52:50.800212" elapsed="1.073444"/>
+</kw>
+<status status="PASS" start="2026-02-18T13:52:48.373989" elapsed="3.499667"/>
+</kw>
+<kw name="Verify Reports Displayed Correctly">
+<kw name="Location Should Contain" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:52.880661" level="INFO">Current location contains 'reports'.</msg>
+<arg>reports</arg>
+<doc>Verifies that the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-02-18T13:52:51.873656" elapsed="1.007005"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:53.961889" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_table_loaded.png"&gt;&lt;img src="admin_view_table_loaded.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_table_loaded.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:52:52.880661" elapsed="1.081228"/>
+</kw>
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>ผู้แจ้ง</arg>
+<arg>15s</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-02-18T13:52:53.961889" elapsed="1.016123"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:56.999221" level="INFO">Current page contains text 'ประเภท'.</msg>
+<arg>ประเภท</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-02-18T13:52:54.978012" elapsed="2.021209"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:52:59.023103" level="INFO">Current page contains text 'ความสำคัญ'.</msg>
+<arg>ความสำคัญ</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-02-18T13:52:56.999732" elapsed="2.023371"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:01.041202" level="INFO">Current page contains text 'หัวข้อ'.</msg>
+<arg>หัวข้อ</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-02-18T13:52:59.023103" elapsed="2.018099"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:03.057245" level="INFO">Current page contains text 'สถานะ'.</msg>
+<arg>สถานะ</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-02-18T13:53:01.041202" elapsed="2.016043"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:05.076531" level="INFO">Current page contains text 'วันที่แจ้ง'.</msg>
+<arg>วันที่แจ้ง</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-02-18T13:53:03.057245" elapsed="2.019286"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:07.098793" level="INFO">Current page contains text 'การกระทำ'.</msg>
+<arg>การกระทำ</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-02-18T13:53:05.076531" elapsed="2.022262"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:08.168233" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_column_verified.png"&gt;&lt;img src="admin_view_column_verified.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_column_verified.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:53:07.098793" elapsed="1.069440"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:10.183960" level="INFO">Current page contains text 'User1nakub nakub'.</msg>
+<arg>User1nakub nakub</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-02-18T13:53:08.168233" elapsed="2.015727"/>
+</kw>
+<kw name="Page Should Contain" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:12.203144" level="INFO">Current page contains text 'User1@gmail.com'.</msg>
+<arg>User1@gmail.com</arg>
+<doc>Verifies that current page contains ``text``.</doc>
+<status status="PASS" start="2026-02-18T13:53:10.183960" elapsed="2.019184"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:13.273198" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_user_verified.png"&gt;&lt;img src="admin_view_user_verified.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_user_verified.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:53:12.203144" elapsed="1.070054"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:14.283413" level="INFO">Current page contains element 'xpath=//span[contains(text(),"คนขับ")]'.</msg>
+<arg>xpath=//span[contains(text(),"คนขับ")]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="PASS" start="2026-02-18T13:53:13.273198" elapsed="1.010215"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:15.348718" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_category_verified.png"&gt;&lt;img src="admin_view_category_verified.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_category_verified.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:53:14.283413" elapsed="1.065305"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:16.357145" level="INFO">Current page contains element 'xpath=//span[contains(text(),"HIGH")]'.</msg>
+<arg>xpath=//span[contains(text(),"HIGH")]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="PASS" start="2026-02-18T13:53:15.348718" elapsed="1.008427"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:17.425920" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_priority_verified.png"&gt;&lt;img src="admin_view_priority_verified.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_priority_verified.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:53:16.357145" elapsed="1.068775"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:18.434567" level="INFO">Current page contains element 'xpath=//span[contains(text(),"IN_PROGRESS")]'.</msg>
+<arg>xpath=//span[contains(text(),"IN_PROGRESS")]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="PASS" start="2026-02-18T13:53:17.426934" elapsed="1.007633"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:19.517619" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_status_verified.png"&gt;&lt;img src="admin_view_status_verified.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_status_verified.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:53:18.434567" elapsed="1.083052"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:20.529960" level="INFO">Current page contains element 'xpath=//*[contains(text(),"คนขับ ขับรถหวาดเสียว")]'.</msg>
+<arg>xpath=//*[contains(text(),"คนขับ ขับรถหวาดเสียว")]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="PASS" start="2026-02-18T13:53:19.518620" elapsed="1.011340"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:21.597570" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_description_verified.png"&gt;&lt;img src="admin_view_description_verified.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_description_verified.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:53:20.529960" elapsed="1.067610"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:22.608152" level="INFO">Current page contains element 'xpath=//*[contains(text(),"256")]'.</msg>
+<arg>xpath=//*[contains(text(),"256")]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="PASS" start="2026-02-18T13:53:21.598578" elapsed="1.009574"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:23.679799" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_date_verified.png"&gt;&lt;img src="admin_view_date_verified.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_date_verified.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:53:22.608152" elapsed="1.071647"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:24.690070" level="INFO">Current page contains element 'xpath=//*[contains(@class,"fa-eye") or contains(@class,"view") or name()="svg"]'.</msg>
+<arg>xpath=//*[contains(@class,"fa-eye") or contains(@class,"view") or name()="svg"]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="PASS" start="2026-02-18T13:53:23.679799" elapsed="1.010271"/>
+</kw>
+<kw name="Page Should Contain Element" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:25.698227" level="INFO">Current page contains element 'xpath=//*[contains(@class,"fa-trash") or contains(@class,"delete") or name()="svg"]'.</msg>
+<arg>xpath=//*[contains(@class,"fa-trash") or contains(@class,"delete") or name()="svg"]</arg>
+<doc>Verifies that element ``locator`` is found on the current page.</doc>
+<status status="PASS" start="2026-02-18T13:53:24.690070" elapsed="1.008157"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-02-18T13:53:26.771601" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="admin_view_action_icons_verified.png"&gt;&lt;img src="admin_view_action_icons_verified.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>admin_view_action_icons_verified.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-02-18T13:53:25.698227" elapsed="1.073882"/>
+</kw>
+<status status="PASS" start="2026-02-18T13:52:51.873656" elapsed="34.898453"/>
+</kw>
+<status status="PASS" start="2026-02-18T13:52:33.962271" elapsed="52.810190"/>
+</test>
+<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-02-18T13:53:26.772461" elapsed="3.083879"/>
+</kw>
+<status status="PASS" start="2026-02-18T13:52:31.091126" elapsed="58.765214"/>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Tc05" id="s1" pass="1" fail="0" skip="0">Tc05</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
