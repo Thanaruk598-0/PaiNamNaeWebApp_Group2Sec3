@@ -62,6 +62,15 @@
                             </div>
                         </div>
 
+                        <!-- แจ้งเหตุการณ์ (My Reports) -->
+                        <div v-if="token">
+                            <NuxtLink :to="user && user.role === 'ADMIN' ? '/admin/reports' : '/myReports'"
+                                class="flex items-center text-gray-600 transition-colors duration-200 hover:text-blue-600"
+                                :class="{ 'text-blue-600': $route.path.startsWith('/myReports') || $route.path.startsWith('/admin/reports') }">
+                                {{ user && user.role === 'ADMIN' ? 'ดูรายงานทั้งหมด' : 'แจ้งเหตุการณ์' }}
+                            </NuxtLink>
+                        </div>
+
                         <div v-if="!token" class="flex items-center space-x-3 ">
                             <NuxtLink to="/register"
                                 class="text-gray-600 transition-colors duration-200 hover:text-blue-600">สมัครสมาชิก
@@ -115,7 +124,7 @@
                                                     <span class="inline-block w-2 h-2 mt-1 rounded-full"
                                                         :class="n.readAt ? 'bg-gray-300' : 'bg-emerald-500'"></span>
 
-                                                    <div class="flex-1 min-w-0">
+                                                    <div class="flex-1 min-w-0 cursor-pointer" @click="handleNotificationClick(n)">
                                                         <p class="text-sm font-medium text-gray-900 truncate">{{ n.title
                                                         }}</p>
                                                         <p class="text-sm text-gray-600 line-clamp-2">{{ n.body }}</p>
@@ -320,6 +329,14 @@
                             </div>
                         </div>
 
+                        <!-- แจ้งเหตุการณ์ (My Reports) - Mobile -->
+                        <NuxtLink v-if="token" :to="user && user.role === 'ADMIN' ? '/admin/reports' : '/myReports'"
+                            class="block px-3 py-2 transition-colors duration-200 rounded-md"
+                            :class="($route.path.startsWith('/myReports') || $route.path.startsWith('/admin/reports')) ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'"
+                            @click="closeMobileMenu">
+                            {{ user && user.role === 'ADMIN' ? 'ดูรายงานทั้งหมด' : 'แจ้งเหตุการณ์' }}
+                        </NuxtLink>
+
                         <div v-if="!token">
                             <NuxtLink to="/register" class="block px-3 py-2 transition-colors duration-200 rounded-md"
                                 :class="$route.path === '/register' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'"
@@ -467,6 +484,7 @@ async function fetchUserNotifications() {
             id: it.id,
             title: it.title || '-',
             body: it.body || '',
+            link: it.link || '',
             createdAt: it.createdAt || Date.now(),
             readAt: it.readAt || null
         }))
@@ -531,6 +549,31 @@ function onKey(e) {
     }
 }
 
+function handleNotificationClick(n) {
+    // Mark as read
+    if (!n.readAt) {
+        markAsRead(n).catch(console.error)
+    }
+
+    // Navigate if link exists
+    // The link might be something like /myReports or /admin/reports/_id
+    // Adjust based on notification data
+    // In report.service.js we set link: `/myReports` or `/admin/reports/${report.id}`
+    // But for admin notifications we set `/admin/reports/${report.id}`
+    // For user report update we set `/myReports` (or could be specific)
+    
+    // Check if we have a link in the notification object from backend
+    // The fetchUserNotifications maps backend response. 
+    // We need to ensure we map 'link' or 'metadata' if we want to use it
+    
+    // Wait, in fetchUserNotifications we only mapped: id, title, body, createdAt, readAt
+    // We need to map 'link' too!
+    
+    const targetLink = n.link || '/myReports' 
+    navigateTo(targetLink)
+    openNotif.value = false
+}
+
 /* เวลาแบบย่อ */
 function timeAgo(ts) {
     const ms = Date.now() - new Date(ts).getTime()
@@ -557,11 +600,11 @@ onUnmounted(() => {
     document.removeEventListener('keydown', onKey)
 })
 
-/* ใส่ฟอนต์ Kanit แบบเดิม */
+
 useHead({
     link: [
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap' },
-        //{ rel: 'stylesheet', href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' }
+       
     ]
 })
 </script>

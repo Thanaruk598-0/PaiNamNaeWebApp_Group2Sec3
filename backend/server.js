@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const helmet = require('helmet');
 // const rateLimit = require('express-rate-limit');
@@ -12,8 +13,10 @@ const { errorHandler } = require('./src/middlewares/errorHandler');
 const ApiError = require('./src/utils/ApiError')
 const { metricsMiddleware } = require('./src/middlewares/metrics');
 const ensureAdmin = require('./src/bootstrap/ensureAdmin');
+const { initSocket } = require('./src/socket');
 
 const app = express();
+const server = http.createServer(app);
 promClient.collectDefaultMetrics();
 
 app.use(helmet());
@@ -74,6 +77,9 @@ app.use((req, res, next) => {
 // --- Error Handling Middleware ---
 app.use(errorHandler);
 
+// --- Initialize Socket.IO ---
+initSocket(server);
+
 // --- Start Server ---
 const PORT = process.env.PORT || 3000;
 (async () => {
@@ -83,7 +89,7 @@ const PORT = process.env.PORT || 3000;
         console.error('Admin bootstrap failed:', e);
     }
 
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
         console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
     });
 })();
