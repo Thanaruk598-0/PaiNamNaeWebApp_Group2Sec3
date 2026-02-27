@@ -20,6 +20,7 @@ const createReportSchema = z.object({
     location: z.union([locationSchema, z.string().transform((val) => {
         try { return JSON.parse(val); } catch { return val; }
     }).pipe(locationSchema)]),
+    bookingId: z.string().cuid({ message: 'Invalid booking ID format' }).optional().nullable(),
 });
 
 const updateReportStatusSchema = z.object({

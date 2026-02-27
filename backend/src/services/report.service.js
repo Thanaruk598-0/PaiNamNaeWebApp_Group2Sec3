@@ -3,9 +3,25 @@ const ApiError = require('../utils/ApiError');
 
 /** User: create a new report */
 const createReport = async (data, userId) => {
+    // Validate bookingId belongs to the user (as passenger or driver)
+    if (data.bookingId) {
+        const booking = await prisma.booking.findUnique({
+            where: { id: data.bookingId },
+            include: { route: { select: { driverId: true } } },
+        });
+        if (!booking) {
+            throw new ApiError(404, 'Booking not found');
+        }
+        // User must be the passenger or the driver of this booking
+        if (booking.passengerId !== userId && booking.route.driverId !== userId) {
+            throw new ApiError(403, 'You are not associated with this booking');
+        }
+    }
+
     const report = await prisma.report.create({
         data: {
             userId,
+            bookingId: data.bookingId || null,
             incidentType: data.incidentType,
             priority: data.priority || 'MEDIUM',
             title: data.title,
@@ -16,6 +32,19 @@ const createReport = async (data, userId) => {
         include: {
             user: {
                 select: { id: true, firstName: true, lastName: true, email: true },
+            },
+            booking: {
+                include: {
+                    route: {
+                        select: {
+                            id: true,
+                            startLocation: true,
+                            endLocation: true,
+                            departureTime: true,
+                            routeSummary: true,
+                        },
+                    },
+                },
             },
         },
     });
@@ -56,6 +85,21 @@ const getMyReports = async (userId) => {
     return prisma.report.findMany({
         where: { userId },
         orderBy: { createdAt: 'desc' },
+        include: {
+            booking: {
+                include: {
+                    route: {
+                        select: {
+                            id: true,
+                            startLocation: true,
+                            endLocation: true,
+                            departureTime: true,
+                            routeSummary: true,
+                        },
+                    },
+                },
+            },
+        },
     });
 };
 
@@ -116,6 +160,19 @@ const getAllReports = async (opts = {}) => {
                         profilePicture: true,
                     },
                 },
+                booking: {
+                    include: {
+                        route: {
+                            select: {
+                                id: true,
+                                startLocation: true,
+                                endLocation: true,
+                                departureTime: true,
+                                routeSummary: true,
+                            },
+                        },
+                    },
+                },
             },
         }),
     ]);
@@ -145,6 +202,29 @@ const getReportById = async (id) => {
                     username: true,
                     profilePicture: true,
                     phoneNumber: true,
+                },
+            },
+            booking: {
+                include: {
+                    route: {
+                        select: {
+                            id: true,
+                            startLocation: true,
+                            endLocation: true,
+                            departureTime: true,
+                            routeSummary: true,
+                            status: true,
+                        },
+                    },
+                    passenger: {
+                        select: {
+                            id: true,
+                            firstName: true,
+                            lastName: true,
+                            email: true,
+                            profilePicture: true,
+                        },
+                    },
                 },
             },
         },

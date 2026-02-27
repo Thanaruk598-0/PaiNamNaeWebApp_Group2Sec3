@@ -27,33 +27,24 @@
                     </h2>
                 </div>
                 <div class="px-6 py-5 space-y-4">
-                    <!-- Row 1: IncidentType + Title -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block mb-1 text-sm font-medium text-gray-700">ประเภทเหตุการณ์ <span
-                                    class="text-red-500">*</span></label>
-                            <select v-model="form.incidentType"
-                                class="w-full px-3 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">-- เลือกประเภท --</option>
-                                <option value="DRIVER">คนขับ</option>
-                                <option value="PASSENGER">ผู้โดยสาร</option>
-                                <option value="ROUTE">เส้นทาง</option>
-                                <option value="BOOKING">การจอง</option>
-                                <option value="SYSTEM">ระบบ</option>
-                                <option value="OTHER">อื่นๆ</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block mb-1 text-sm font-medium text-gray-700">หัวข้อ <span
-                                    class="text-red-500">*</span></label>
-                            <input v-model="form.title" type="text" placeholder="สรุปปัญหาสั้นๆ"
-                                class="w-full px-3 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                        </div>
+                    <!-- 1. Trip Selection (บนสุด) -->
+                    <div>
+                        <label class="block mb-1 text-sm font-medium text-gray-700">
+                            <i class="fas fa-route mr-1 text-blue-400"></i>Trip ที่เกี่ยวข้อง (ไม่บังคับ)
+                        </label>
+                        <select v-model="form.bookingId"
+                            class="w-full px-3 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">-- ไม่ระบุ Trip --</option>
+                            <option v-for="trip in myTrips" :key="trip.id" :value="trip.id">
+                                {{ tripLabel(trip) }}
+                            </option>
+                        </select>
+                        <p class="text-xs text-gray-400 mt-1">เลือก Trip ที่คุณต้องการแจ้งรายงาน (ทั้งในฐานะผู้โดยสารหรือคนขับ)</p>
                     </div>
 
-                    <!-- Row 2: Priority -->
+                    <!-- 2. ระดับความสำคัญ -->
                     <div>
-                        <label class="block mb-1 text-sm font-medium text-gray-700">ระดับความสำคัญ</label>
+                        <label class="block mb-1 text-sm font-medium text-gray-700"><i class="fas fa-exclamation-triangle mr-1 text-yellow-500"></i>ระดับความสำคัญ</label>
                         <div class="flex flex-wrap gap-2">
                             <button v-for="p in priorityOptions" :key="p.value" @click="form.priority = p.value"
                                 type="button"
@@ -66,9 +57,38 @@
                         </div>
                     </div>
 
-                    <!-- Row 3: Description -->
+                    <!-- 3. ประเภทเหตุการณ์ + หัวข้อ -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-gray-700"><i class="fas fa-list-check mr-1 text-indigo-400"></i>ประเภทเหตุการณ์ <span
+                                    class="text-red-500">*</span></label>
+                            <select v-model="form.incidentType" @change="onIncidentTypeChange"
+                                class="w-full px-3 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">-- เลือกประเภท --</option>
+                                <option value="SAFETY">ความปลอดภัย</option>
+                                <option value="TRIP_ISSUE">ปัญหาระหว่างเดินทาง</option>
+                                <option value="BEHAVIOR">พฤติกรรม</option>
+                                <option value="PROPERTY">ทรัพย์สิน</option>
+                                <option value="TECHNICAL">เทคนิค</option>
+                                <option value="OTHER">อื่นๆ</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block mb-1 text-sm font-medium text-gray-700"><i class="fas fa-tag mr-1 text-emerald-400"></i>หัวข้อ <span
+                                    class="text-red-500">*</span></label>
+                            <select v-if="subTopics.length > 0" v-model="form.title"
+                                class="w-full px-3 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">-- เลือกหัวข้อ --</option>
+                                <option v-for="st in subTopics" :key="st" :value="st">{{ st }}</option>
+                            </select>
+                            <input v-else v-model="form.title" type="text" placeholder="สรุปปัญหาสั้นๆ"
+                                class="w-full px-3 py-2 transition border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                        </div>
+                    </div>
+
+                    <!-- 4. รายละเอียด -->
                     <div>
-                        <label class="block mb-1 text-sm font-medium text-gray-700">รายละเอียด <span
+                        <label class="block mb-1 text-sm font-medium text-gray-700"><i class="fas fa-align-left mr-1 text-gray-400"></i>รายละเอียด <span
                                 class="text-red-500">*</span></label>
                         <textarea v-model="form.description" rows="3" placeholder="อธิบายเหตุการณ์โดยละเอียด..."
                             class="w-full px-3 py-2 transition border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
@@ -104,14 +124,21 @@
                         <label class="block mb-1 text-sm font-medium text-gray-700">
                             <i class="fas fa-map-marker-alt mr-1 text-red-400"></i>ตำแหน่งเหตุการณ์ <span class="text-red-500">*</span>
                         </label>
-                        <p class="text-xs text-gray-400 mb-2">คลิกบนแผนที่เพื่อปักหมุดตำแหน่ง</p>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-xs text-gray-400">คลิกบนแผนที่เพื่อปักหมุดตำแหน่ง</p>
+                            <button @click="getCurrentLocation" type="button" 
+                                class="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors">
+                                <i class="fas fa-location-crosshairs"></i> ใช้ตำแหน่งปัจจุบัน
+                            </button>
+                        </div>
                         <div ref="mapContainer"
                             class="w-full h-64 rounded-xl border border-gray-200 overflow-hidden bg-gray-100">
                         </div>
                         <div v-if="form.location" class="mt-2 flex items-center gap-2">
                             <span class="text-xs text-gray-500">
                                 <i class="fas fa-location-dot text-red-400 mr-1"></i>
-                                {{ form.location.lat.toFixed(6) }}, {{ form.location.lng.toFixed(6) }}
+                                <template v-if="form.location.address">{{ form.location.address }}</template>
+                                <template v-else>{{ form.location.lat.toFixed(6) }}, {{ form.location.lng.toFixed(6) }}</template>
                             </span>
                             <button @click="clearLocation"
                                 class="text-xs text-red-500 hover:text-red-700 cursor-pointer">
@@ -165,23 +192,33 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-1 flex-wrap">
                                     <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full"
-                                        :class="typeBadge(r.incidentType)">
-                                        <i class="mr-1 fas" :class="typeIcon(r.incidentType)"></i>
-                                        {{ typeLabel(r.incidentType) }}
-                                    </span>
-                                    <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full"
                                         :class="priorityBadge(r.priority)">
                                         <i class="mr-1 fas" :class="priorityIcon(r.priority)"></i>
                                         {{ r.priority }}
                                     </span>
                                     <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full"
-                                        :class="statusBadge(r.status)">
-                                        <i class="mr-1 fas" :class="statusIcon(r.status)"></i>
-                                        {{ statusLabel(r.status) }}
+                                        :class="typeBadge(r.incidentType)">
+                                        <i class="mr-1 fas" :class="typeIcon(r.incidentType)"></i>
+                                        {{ typeLabel(r.incidentType) }}
                                     </span>
                                 </div>
                                 <h3 class="font-medium text-gray-900 truncate">{{ r.title }}</h3>
                                 <p class="text-sm text-gray-500 line-clamp-2 mt-1">{{ r.description }}</p>
+
+                                <!-- Trip Info -->
+                                <div v-if="r.booking" class="mt-2 p-2 bg-indigo-50 border border-indigo-200 rounded-lg">
+                                    <p class="text-xs font-medium text-indigo-600 mb-1">
+                                        <i class="fas fa-route mr-1"></i>Trip ที่เกี่ยวข้อง
+                                    </p>
+                                    <p class="text-sm text-indigo-800">
+                                        {{ r.booking.route?.startLocation?.name || 'ต้นทาง' }}
+                                        →
+                                        {{ r.booking.route?.endLocation?.name || 'ปลายทาง' }}
+                                        <span class="text-xs text-indigo-500 ml-2">
+                                            {{ formatDate(r.booking.route?.departureTime) }}
+                                        </span>
+                                    </p>
+                                </div>
 
                                 <!-- Image -->
                                 <div v-if="r.imageUrl" class="mt-2">
@@ -191,12 +228,10 @@
                                 </div>
 
                                 <!-- Location -->
-                                <div v-if="r.location" class="mt-2">
-                                    <span class="text-xs text-gray-400">
-                                        <i class="fas fa-location-dot text-red-400 mr-1"></i>
-                                        {{ r.location.lat?.toFixed(4) }}, {{ r.location.lng?.toFixed(4) }}
-                                        <span v-if="r.location.address" class="ml-1">{{ r.location.address }}</span>
-                                    </span>
+                                <div v-if="r.location" class="mt-2 text-xs text-gray-500 flex items-start gap-1">
+                                    <i class="fas fa-location-dot text-red-500 mt-0.5"></i>
+                                    <span v-if="r.location.address" class="flex-1">{{ r.location.address }}</span>
+                                    <span v-else>{{ r.location.lat?.toFixed(6) }}, {{ r.location.lng?.toFixed(6) }}</span>
                                 </div>
 
                                 <!-- Admin Note -->
@@ -208,10 +243,17 @@
                                     <p class="text-sm text-blue-800">{{ r.adminNote }}</p>
                                 </div>
                             </div>
-                            <div class="text-right shrink-0">
-                                <p class="text-xs text-gray-400">{{ formatDate(r.createdAt) }}</p>
+                            <div class="flex flex-col items-end justify-between shrink-0 self-stretch min-w-[120px] ml-4">
+                                <div class="flex flex-col items-end gap-1.5 mt-1">
+                                    <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full"
+                                        :class="statusBadge(r.status)">
+                                        <i class="mr-1 fas" :class="statusIcon(r.status)"></i>
+                                        {{ statusLabel(r.status) }}
+                                    </span>
+                                    <p class="text-xs text-gray-400 whitespace-nowrap">{{ formatDate(r.createdAt) }}</p>
+                                </div>
                                 <button @click="openChat(r.id)"
-                                    class="mt-2 px-3 py-1 text-xs bg-blue-500 text-white rounded-md hover:bg-blue-600 transition">
+                                    class="mt-auto mb-1 px-4 py-1.5 text-xs bg-blue-500 text-white rounded-md hover:bg-blue-600 transition shadow-sm w-full text-center">
                                     <i class="fas fa-comment-dots mr-1"></i>แชท
                                 </button>
                             </div>
@@ -453,6 +495,36 @@ function scrollToBottom() {
     })
 }
 
+// ─── Sub-topics mapping (แยกตาม role) ───
+const authData = useAuth()
+const userRole = computed(() => authData.user.value?.role || 'PASSENGER')
+
+const passengerSubTopics = {
+    SAFETY: ['อุบัติเหตุ', 'การคุกคาม/ล่วงละเมิด', 'คนขับมีพฤติกรรมไม่เหมาะสม', 'เมาแล้วขับ', 'ขับรถอันตราย', 'อื่นๆ'],
+    TRIP_ISSUE: ['ขับอ้อมเส้นทาง', 'คิดเงินผิด', 'จุดรับ/ส่งผิด', 'ไม่มาตามนัด', 'เรียกเก็บค่าเสียหายไม่ถูกต้อง', 'อื่นๆ'],
+    BEHAVIOR: ['คนขับไม่สุภาพ', 'เปิดเพลงเสียงดัง', 'สูบบุหรี่ในรถ', 'รถไม่สะอาด', 'อื่นๆ'],
+    PROPERTY: ['ลืมของในรถ', 'ของเสียหาย', 'อื่นๆ'],
+    TECHNICAL: ['แอปล่ม', 'GPS ผิดพลาด', 'ชำระเงินไม่ได้', 'ระบบคำนวณราคาผิด', 'อื่นๆ'],
+}
+
+const driverSubTopics = {
+    SAFETY: ['อุบัติเหตุ', 'ผู้โดยสารก่อกวน', 'ผู้โดยสารคุกคาม', 'ผู้โดยสารมึนเมา', 'อื่นๆ'],
+    TRIP_ISSUE: ['ผู้โดยสารไม่มาตามนัด', 'ผู้โดยสารเปลี่ยนจุดหมาย', 'ผู้โดยสารไม่ชำระเงิน', 'อื่นๆ'],
+    BEHAVIOR: ['ผู้โดยสารไม่สุภาพ', 'ผู้โดยสารสูบบุหรี่ในรถ', 'ผู้โดยสารทำเสียงดัง', 'ผู้โดยสารทิ้งขยะ', 'อื่นๆ'],
+    PROPERTY: ['ผู้โดยสารทำรถเสียหาย', 'ของหายในรถ', 'อื่นๆ'],
+    TECHNICAL: ['แอปล่ม', 'GPS ผิดพลาด', 'ระบบคำนวณราคาผิด', 'รับงานไม่ได้', 'อื่นๆ'],
+}
+
+const subTopics = computed(() => {
+    const map = userRole.value === 'DRIVER' ? driverSubTopics : passengerSubTopics
+    return map[form.value.incidentType] || []
+})
+
+function onIncidentTypeChange() {
+    form.value.title = '' // reset หัวข้อเมื่อเปลี่ยนประเภท
+    form.value.customTitle = '' // reset custom title
+}
+
 // Image
 const imageFile = ref(null)
 const imagePreview = ref(null)
@@ -460,9 +532,12 @@ const imagePreview = ref(null)
 // Map
 const mapContainer = ref(null)
 let map = null
-let marker = null
+let marker
+let geocoder = null // สำหรับแปลงพิกัดเป็นชื่อสถานที่
 
 const GMAPS_CB = '__initReportMap__'
+
+const myTrips = ref([])
 
 const form = ref({
     incidentType: '',
@@ -470,6 +545,7 @@ const form = ref({
     title: '',
     description: '',
     location: null,
+    bookingId: '',
 })
 
 const priorityOptions = [
@@ -542,16 +618,104 @@ function initMap() {
         },
     })
 
-    map.addListener('click', (e) => {
+    geocoder = new google.maps.Geocoder()
+
+    async function geocodePosition(pos) {
+        // ใช้ Promise เพื่อให้รอผลลัพธ์
+        return new Promise((resolve) => {
+            geocoder.geocode({ location: pos }, (results, status) => {
+                if (status === 'OK' && results && results[0]) {
+                    resolve(results[0].formatted_address)
+                } else {
+                    resolve('') // คืนค่าว่างถ้าไม่พบที่อยู่
+                }
+            })
+        })
+    }
+
+    map.addListener('click', async (e) => {
         const pos = { lat: e.latLng.lat(), lng: e.latLng.lng() }
         marker.setPosition(pos)
         marker.setVisible(true)
+        
+        // กำหนดพิกัดเริ่มต้นไปก่อน
         form.value.location = pos
+        // ดึงชื่อสถานที่
+        const address = await geocodePosition(pos)
+        if (address) {
+            form.value.location = { ...pos, address }
+        }
     })
 
-    marker.addListener('dragend', (e) => {
-        form.value.location = { lat: e.latLng.lat(), lng: e.latLng.lng() }
+    marker.addListener('dragend', async (e) => {
+        const pos = { lat: e.latLng.lat(), lng: e.latLng.lng() }
+        form.value.location = pos
+        
+        const address = await geocodePosition(pos)
+        if (address) {
+            form.value.location = { ...pos, address }
+        }
     })
+}
+
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        toast.info('กำลังค้นหาตำแหน่ง...', 'กรุณารอสักครู่')
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                }
+                
+                // เลื่อนแผนที่ไปที่ตำแหน่งปัจจุบัน
+                if (map) {
+                    map.setCenter(pos)
+                    map.setZoom(15) // ซูมเข้าใกล้ขึ้นนิดนึง
+                }
+                
+                // ปักหมุด
+                if (marker) {
+                    marker.setPosition(pos)
+                    marker.setVisible(true)
+                }
+                
+                // กำหนดค่าลง form ให้มี lat/lng ไปก่อน
+                form.value.location = pos
+                
+                // ดึงชื่อสถานที่ด้วย Reverse Geocoding
+                if (geocoder) {
+                    try {
+                        const address = await new Promise((resolve) => {
+                            geocoder.geocode({ location: pos }, (results, status) => {
+                                if (status === 'OK' && results && results[0]) {
+                                    resolve(results[0].formatted_address)
+                                } else {
+                                    resolve('')
+                                }
+                            })
+                        })
+                        if (address) {
+                            form.value.location = { ...pos, address }
+                        }
+                    } catch (e) {
+                         console.error('Geocoder failed:', e)
+                    }
+                }
+                toast.success('พบตำแหน่งของคุณแล้ว', 'พร้อมส่งรายงาน')
+            },
+            () => {
+                toast.error('ไม่สามารถดึงตำแหน่งได้', 'กรุณาอนุญาตการเข้าถึงตำแหน่งและลองอีกครั้ง')
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+        )
+    } else {
+        toast.error('ไม่รองรับการดึงตำแหน่ง', 'เบราว์เซอร์ของคุณไม่รองรับการดึงตำแหน่งปัจจุบัน')
+    }
 }
 
 function clearLocation() {
@@ -577,6 +741,25 @@ async function fetchReports() {
         const body = await res.json()
         if (!res.ok) throw new Error(body?.message || 'Failed to fetch reports')
         reports.value = Array.isArray(body?.data) ? body.data : []
+        
+        // Reverse geocoding สำหรับรายงานที่ไม่มี location.address อยู่ก่อน
+        const apiKey = config.public.googleMapsApiKey
+        if (apiKey) {
+            reports.value.forEach(async (r) => {
+                if (r.location && r.location.lat && r.location.lng && !r.location.address) {
+                    try {
+                        const geoRes = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${r.location.lat},${r.location.lng}&key=${apiKey}`)
+                        const geoBody = await geoRes.json()
+                        if (geoBody.status === 'OK' && geoBody.results && geoBody.results[0]) {
+                            // อัพเดทข้อมูลในตัวแปร r ทันที เพื่อให้ Vue ทำการ render ใหม่
+                            r.location.address = geoBody.results[0].formatted_address
+                        }
+                    } catch (e) {
+                        console.error('Reverse Geocoding error:', e)
+                    }
+                }
+            })
+        }
     } catch (err) {
         console.error(err)
     } finally {
@@ -588,8 +771,15 @@ async function submitReport() {
     submitError.value = ''
     submitSuccess.value = false
 
-    if (!form.value.incidentType || !form.value.title || !form.value.description) {
+    // ถ้าเลือก 'อื่นๆ' ให้ใช้ customTitle แทน
+    const actualTitle = form.value.title === 'อื่นๆ' ? form.value.customTitle : form.value.title
+
+    if (!form.value.incidentType || !actualTitle || !form.value.description) {
         submitError.value = 'กรุณากรอกข้อมูลให้ครบทุกช่อง (ประเภท, หัวข้อ, รายละเอียด)'
+        return
+    }
+    if (form.value.title === 'อื่นๆ' && !form.value.customTitle) {
+        submitError.value = 'กรุณาระบุหัวข้อของคุณ'
         return
     }
     if (!form.value.location) {
@@ -604,9 +794,12 @@ async function submitReport() {
         const fd = new FormData()
         fd.append('incidentType', form.value.incidentType)
         fd.append('priority', form.value.priority || 'MEDIUM')
-        fd.append('title', form.value.title)
+        fd.append('title', actualTitle)
         fd.append('description', form.value.description)
 
+        if (form.value.bookingId) {
+            fd.append('bookingId', form.value.bookingId)
+        }
         if (form.value.location) {
             fd.append('location', JSON.stringify(form.value.location))
         }
@@ -626,7 +819,7 @@ async function submitReport() {
         if (!res.ok) throw new Error(body?.message || 'Failed to create report')
 
         submitSuccess.value = true
-        form.value = { incidentType: '', priority: 'MEDIUM', title: '', description: '', location: null }
+        form.value = { incidentType: '', priority: 'MEDIUM', title: '', description: '', location: null, bookingId: '', customTitle: '' }
         removeImage()
         clearLocation()
         await fetchReports()
@@ -667,27 +860,27 @@ function statusLabel(s) {
 }
 
 function typeBadge(t) {
-    if (t === 'DRIVER') return 'bg-orange-100 text-orange-700'
-    if (t === 'PASSENGER') return 'bg-blue-100 text-blue-700'
-    if (t === 'ROUTE') return 'bg-emerald-100 text-emerald-700'
-    if (t === 'BOOKING') return 'bg-purple-100 text-purple-700'
-    if (t === 'SYSTEM') return 'bg-red-100 text-red-700'
+    if (t === 'SAFETY') return 'bg-red-100 text-red-700'
+    if (t === 'TRIP_ISSUE') return 'bg-orange-100 text-orange-700'
+    if (t === 'BEHAVIOR') return 'bg-yellow-100 text-yellow-700'
+    if (t === 'PROPERTY') return 'bg-blue-100 text-blue-700'
+    if (t === 'TECHNICAL') return 'bg-purple-100 text-purple-700'
     return 'bg-gray-100 text-gray-700'
 }
 function typeIcon(t) {
-    if (t === 'DRIVER') return 'fa-id-card'
-    if (t === 'PASSENGER') return 'fa-user'
-    if (t === 'ROUTE') return 'fa-route'
-    if (t === 'BOOKING') return 'fa-calendar-check'
-    if (t === 'SYSTEM') return 'fa-gear'
+    if (t === 'SAFETY') return 'fa-shield-halved'
+    if (t === 'TRIP_ISSUE') return 'fa-car-burst'
+    if (t === 'BEHAVIOR') return 'fa-user-slash'
+    if (t === 'PROPERTY') return 'fa-box-open'
+    if (t === 'TECHNICAL') return 'fa-gear'
     return 'fa-circle-question'
 }
 function typeLabel(t) {
-    if (t === 'DRIVER') return 'คนขับ'
-    if (t === 'PASSENGER') return 'ผู้โดยสาร'
-    if (t === 'ROUTE') return 'เส้นทาง'
-    if (t === 'BOOKING') return 'การจอง'
-    if (t === 'SYSTEM') return 'ระบบ'
+    if (t === 'SAFETY') return 'ความปลอดภัย'
+    if (t === 'TRIP_ISSUE') return 'ปัญหาระหว่างเดินทาง'
+    if (t === 'BEHAVIOR') return 'พฤติกรรม'
+    if (t === 'PROPERTY') return 'ทรัพย์สิน'
+    if (t === 'TECHNICAL') return 'เทคนิค'
     return 'อื่นๆ'
 }
 
@@ -706,8 +899,34 @@ function priorityIcon(p) {
     return 'fa-circle'
 }
 
+function tripLabel(trip) {
+    const start = trip.route?.startLocation?.name || 'ต้นทาง'
+    const end = trip.route?.endLocation?.name || 'ปลายทาง'
+    const date = trip.route?.departureTime ? dayjs(trip.route.departureTime).format('D MMM BBBB HH:mm') : ''
+    const role = trip.userRole === 'DRIVER' ? '[คนขับ]' : '[ผู้โดยสาร]'
+    return `${role} ${start} → ${end} (${date})`
+}
+
+async function fetchMyTrips() {
+    try {
+        const token = getToken()
+        const res = await fetch(`${config.public.apiBase}bookings/my-trips`, {
+            headers: {
+                Accept: 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+        })
+        const body = await res.json()
+        if (!res.ok) throw new Error(body?.message || 'Failed to fetch trips')
+        myTrips.value = Array.isArray(body?.data) ? body.data : []
+    } catch (err) {
+        console.error('Failed to fetch trips for report:', err)
+    }
+}
+
 onMounted(() => {
     fetchReports()
+    fetchMyTrips()
     if (process.client) {
         loadGoogleMaps()
     }

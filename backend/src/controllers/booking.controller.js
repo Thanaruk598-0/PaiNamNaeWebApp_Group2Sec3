@@ -97,6 +97,12 @@ const adminDeleteBooking = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: result });
 });
 
+const getMyTripsForReport = asyncHandler(async (req, res) => {
+  const userId = req.user.sub;
+  const trips = await bookingService.getMyTripsForReport(userId);
+  res.status(200).json({ success: true, data: trips });
+});
+
 module.exports = {
   adminListBookings,
   createBooking,
@@ -108,5 +114,6 @@ module.exports = {
   adminGetBookingById,
   adminCreateBooking,
   adminUpdateBooking,
-  adminDeleteBooking
+  adminDeleteBooking,
+  getMyTripsForReport,
 };

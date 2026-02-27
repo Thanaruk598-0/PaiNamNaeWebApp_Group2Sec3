@@ -68,11 +68,11 @@ enum ReportStatus {
 }
 
 enum IncidentType {
-  DRIVER
-  PASSENGER
-  ROUTE
-  BOOKING
-  SYSTEM
+  SAFETY
+  TRIP_ISSUE
+  BEHAVIOR
+  PROPERTY
+  TECHNICAL
   OTHER
 }
 
@@ -234,12 +234,15 @@ model Booking {
   pickupLocation  Json          @db.Json
   dropoffLocation Json          @db.Json
   createdAt       DateTime      @default(now())
+  reports         Report[]
 }
 
 model Report {
   id           String           @id @default(cuid())
   userId       String
   user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookingId    String?
+  booking      Booking?         @relation(fields: [bookingId], references: [id], onDelete: SetNull)
   incidentType IncidentType
   priority     IncidentPriority @default(MEDIUM)
   title        String
@@ -253,6 +256,7 @@ model Report {
   messages     ChatMessage[]
 
   @@index([userId])
+  @@index([bookingId])
   @@index([status])
   @@index([incidentType])
   @@index([priority])

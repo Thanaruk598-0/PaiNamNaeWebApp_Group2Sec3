@@ -58,19 +58,8 @@
 
                             <hr class="border-gray-200" />
 
-                            <!-- IncidentType, Priority, Status -->
+                            <!-- Priority, IncidentType, Status -->
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="text-xs font-medium text-gray-500 uppercase">ประเภทเหตุการณ์</label>
-                                    <div class="mt-1">
-                                        <span
-                                            class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full"
-                                            :class="typeBadge(report.incidentType)">
-                                            <i class="mr-1 fas" :class="typeIcon(report.incidentType)"></i>
-                                            {{ typeLabel(report.incidentType) }}
-                                        </span>
-                                    </div>
-                                </div>
                                 <div>
                                     <label class="text-xs font-medium text-gray-500 uppercase">ระดับความสำคัญ</label>
                                     <div class="mt-1">
@@ -79,6 +68,17 @@
                                             :class="priorityBadge(report.priority)">
                                             <i class="mr-1 fas" :class="priorityIcon(report.priority)"></i>
                                             {{ report.priority }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-medium text-gray-500 uppercase">ประเภทเหตุการณ์</label>
+                                    <div class="mt-1">
+                                        <span
+                                            class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full"
+                                            :class="typeBadge(report.incidentType)">
+                                            <i class="mr-1 fas" :class="typeIcon(report.incidentType)"></i>
+                                            {{ typeLabel(report.incidentType) }}
                                         </span>
                                     </div>
                                 </div>
@@ -122,14 +122,69 @@
                             <!-- Location -->
                             <div v-if="report.location">
                                 <label class="text-xs font-medium text-gray-500 uppercase">ตำแหน่งเหตุการณ์</label>
-                                <p class="mt-1 text-sm text-gray-600">
-                                    <i class="fas fa-location-dot text-red-400 mr-1"></i>
-                                    {{ report.location.lat?.toFixed(6) }}, {{ report.location.lng?.toFixed(6) }}
-                                    <span v-if="report.location.address" class="ml-1 text-gray-500">({{
-                                        report.location.address }})</span>
+                                <p class="mt-1 text-sm text-gray-600 flex items-start gap-1">
+                                    <i class="fas fa-location-dot text-red-500 mt-0.5"></i>
+                                    <span v-if="report.location.address" class="flex-1">{{ report.location.address }}</span>
+                                    <span v-else>{{ report.location.lat?.toFixed(6) }}, {{ report.location.lng?.toFixed(6) }}</span>
                                 </p>
                                 <div ref="detailMapContainer"
                                     class="mt-2 w-full h-48 rounded-xl border border-gray-200 overflow-hidden bg-gray-100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trip Info Card -->
+                    <div v-if="report.booking" class="bg-white rounded-lg border border-gray-300 shadow-sm overflow-hidden">
+                        <div class="px-6 py-4 bg-gradient-to-r from-indigo-600 to-indigo-500">
+                            <h2 class="text-lg font-semibold text-white">
+                                <i class="fas fa-route mr-2"></i>Trip ที่เกี่ยวข้อง
+                            </h2>
+                        </div>
+                        <div class="px-6 py-5 space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="text-xs font-medium text-gray-500 uppercase">เส้นทาง</label>
+                                    <p class="mt-1 text-gray-900 font-medium">
+                                        {{ report.booking.route?.startLocation?.name || 'ต้นทาง' }}
+                                        →
+                                        {{ report.booking.route?.endLocation?.name || 'ปลายทาง' }}
+                                    </p>
+                                    <p v-if="report.booking.route?.routeSummary" class="text-sm text-gray-500">
+                                        {{ report.booking.route.routeSummary }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-medium text-gray-500 uppercase">เวลาออกเดินทาง</label>
+                                    <p class="mt-1 text-gray-900">
+                                        {{ formatDate(report.booking.route?.departureTime) }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <hr class="border-gray-200" />
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="text-xs font-medium text-gray-500 uppercase">ผู้โดยสาร</label>
+                                    <p class="mt-1 text-gray-900">
+                                        {{ report.booking.passenger?.firstName || '-' }}
+                                        {{ report.booking.passenger?.lastName || '' }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">{{ report.booking.passenger?.email }}</p>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-medium text-gray-500 uppercase">สถานะ Booking</label>
+                                    <div class="mt-1">
+                                        <span class="inline-flex items-center px-3 py-1 text-sm font-medium rounded-full"
+                                            :class="bookingStatusBadge(report.booking.status)">
+                                            {{ bookingStatusLabel(report.booking.status) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-medium text-gray-500 uppercase">จำนวนที่นั่ง</label>
+                                    <p class="mt-1 text-gray-900">{{ report.booking.numberOfSeats }} ที่นั่ง</p>
                                 </div>
                             </div>
                         </div>
@@ -326,6 +381,24 @@ async function fetchReport() {
             status: body?.data?.status || 'PENDING',
             adminNote: body?.data?.adminNote || '',
         }
+        
+        // Reverse geocoding สำหรับพิกัดของ report นี้
+        const apiKey = config.public.googleMapsApiKey
+        if (apiKey && report.value?.location && report.value.location.lat && report.value.location.lng && !report.value.location.address) {
+            try {
+                fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${report.value.location.lat},${report.value.location.lng}&key=${apiKey}`)
+                    .then(res => res.json())
+                    .then(geoBody => {
+                        if (geoBody.status === 'OK' && geoBody.results && geoBody.results[0]) {
+                            report.value.location.address = geoBody.results[0].formatted_address
+                        }
+                    })
+                    .catch(e => console.error('Reverse Geocoding error:', e))
+            } catch (e) {
+                console.error(e)
+            }
+        }
+
         // Load map if there's location data
         if (report.value?.location && process.client) {
             await nextTick()
@@ -452,27 +525,27 @@ function statusLabel(s) {
 }
 
 function typeBadge(t) {
-    if (t === 'DRIVER') return 'bg-orange-100 text-orange-700'
-    if (t === 'PASSENGER') return 'bg-blue-100 text-blue-700'
-    if (t === 'ROUTE') return 'bg-emerald-100 text-emerald-700'
-    if (t === 'BOOKING') return 'bg-purple-100 text-purple-700'
-    if (t === 'SYSTEM') return 'bg-red-100 text-red-700'
+    if (t === 'SAFETY') return 'bg-red-100 text-red-700'
+    if (t === 'TRIP_ISSUE') return 'bg-orange-100 text-orange-700'
+    if (t === 'BEHAVIOR') return 'bg-yellow-100 text-yellow-700'
+    if (t === 'PROPERTY') return 'bg-blue-100 text-blue-700'
+    if (t === 'TECHNICAL') return 'bg-purple-100 text-purple-700'
     return 'bg-gray-100 text-gray-700'
 }
 function typeIcon(t) {
-    if (t === 'DRIVER') return 'fa-id-card'
-    if (t === 'PASSENGER') return 'fa-user'
-    if (t === 'ROUTE') return 'fa-route'
-    if (t === 'BOOKING') return 'fa-calendar-check'
-    if (t === 'SYSTEM') return 'fa-gear'
+    if (t === 'SAFETY') return 'fa-shield-halved'
+    if (t === 'TRIP_ISSUE') return 'fa-car-burst'
+    if (t === 'BEHAVIOR') return 'fa-user-slash'
+    if (t === 'PROPERTY') return 'fa-box-open'
+    if (t === 'TECHNICAL') return 'fa-gear'
     return 'fa-circle-question'
 }
 function typeLabel(t) {
-    if (t === 'DRIVER') return 'คนขับ'
-    if (t === 'PASSENGER') return 'ผู้โดยสาร'
-    if (t === 'ROUTE') return 'เส้นทาง'
-    if (t === 'BOOKING') return 'การจอง'
-    if (t === 'SYSTEM') return 'ระบบ'
+    if (t === 'SAFETY') return 'ความปลอดภัย'
+    if (t === 'TRIP_ISSUE') return 'ปัญหาระหว่างเดินทาง'
+    if (t === 'BEHAVIOR') return 'พฤติกรรม'
+    if (t === 'PROPERTY') return 'ทรัพย์สิน'
+    if (t === 'TECHNICAL') return 'เทคนิค'
     return 'อื่นๆ'
 }
 
@@ -489,6 +562,21 @@ function priorityIcon(p) {
     if (p === 'HIGH') return 'fa-circle-up'
     if (p === 'CRITICAL') return 'fa-circle-exclamation'
     return 'fa-circle'
+}
+
+function bookingStatusBadge(s) {
+    if (s === 'PENDING') return 'bg-amber-100 text-amber-700'
+    if (s === 'CONFIRMED') return 'bg-green-100 text-green-700'
+    if (s === 'REJECTED') return 'bg-red-100 text-red-700'
+    if (s === 'CANCELLED') return 'bg-gray-100 text-gray-700'
+    return 'bg-gray-100 text-gray-700'
+}
+function bookingStatusLabel(s) {
+    if (s === 'PENDING') return 'รอยืนยัน'
+    if (s === 'CONFIRMED') return 'ยืนยันแล้ว'
+    if (s === 'REJECTED') return 'ปฏิเสธ'
+    if (s === 'CANCELLED') return 'ยกเลิก'
+    return s
 }
 
 useHead({

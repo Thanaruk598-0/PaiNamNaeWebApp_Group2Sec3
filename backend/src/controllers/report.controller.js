@@ -25,6 +25,7 @@ const createReport = asyncHandler(async (req, res) => {
         description: req.body.description,
         location: location || null,
         imageUrl,
+        bookingId: req.body.bookingId || null,
     };
 
     const report = await reportService.createReport(reportData, req.user.sub);

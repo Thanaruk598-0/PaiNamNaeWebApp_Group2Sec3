@@ -71,6 +71,13 @@ router.get(
   bookingController.getMyBookings
 );
 
+// GET /bookings/my-trips (for report dropdown)
+router.get(
+  '/my-trips',
+  protect,
+  bookingController.getMyTripsForReport
+);
+
 // GET /bookings/:id
 router.get(
   '/:id',

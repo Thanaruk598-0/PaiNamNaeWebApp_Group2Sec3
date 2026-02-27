@@ -490,6 +490,79 @@ const adminDeleteBooking = async (id) => {
   });
 };
 
+/** Get user's trips (as passenger or driver) for report dropdown */
+const getMyTripsForReport = async (userId) => {
+  // Bookings where user is the passenger
+  const asPassenger = await prisma.booking.findMany({
+    where: {
+      passengerId: userId,
+      status: { in: ['PENDING', 'CONFIRMED'] },
+    },
+    include: {
+      route: {
+        select: {
+          id: true,
+          startLocation: true,
+          endLocation: true,
+          departureTime: true,
+          routeSummary: true,
+          driverId: true,
+          driver: {
+            select: { id: true, firstName: true, lastName: true },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  // Routes where user is the driver -> find bookings on those routes
+  const asDriver = await prisma.booking.findMany({
+    where: {
+      route: { driverId: userId },
+      status: { in: ['PENDING', 'CONFIRMED'] },
+    },
+    include: {
+      passenger: {
+        select: { id: true, firstName: true, lastName: true },
+      },
+      route: {
+        select: {
+          id: true,
+          startLocation: true,
+          endLocation: true,
+          departureTime: true,
+          routeSummary: true,
+          driverId: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  // Combine and mark role
+  const passengerTrips = asPassenger.map((b) => ({
+    ...b,
+    userRole: 'PASSENGER',
+  }));
+  const driverTrips = asDriver.map((b) => ({
+    ...b,
+    userRole: 'DRIVER',
+  }));
+
+  // Deduplicate by booking ID
+  const seen = new Set();
+  const combined = [];
+  for (const trip of [...passengerTrips, ...driverTrips]) {
+    if (!seen.has(trip.id)) {
+      seen.add(trip.id);
+      combined.push(trip);
+    }
+  }
+
+  return combined;
+};
+
 module.exports = {
   searchBookingsAdmin,
   adminCreateBooking,
@@ -501,5 +574,6 @@ module.exports = {
   updateBookingStatus,
   cancelBooking,
   deleteBooking,
-  adminDeleteBooking
+  adminDeleteBooking,
+  getMyTripsForReport,
 };

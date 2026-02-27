@@ -41,11 +41,11 @@
                             <select v-model="filters.incidentType"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500">
                                 <option value="">ทั้งหมด</option>
-                                <option value="DRIVER">คนขับ</option>
-                                <option value="PASSENGER">ผู้โดยสาร</option>
-                                <option value="ROUTE">เส้นทาง</option>
-                                <option value="BOOKING">การจอง</option>
-                                <option value="SYSTEM">ระบบ</option>
+                                <option value="SAFETY">🔴 ความปลอดภัย</option>
+                                <option value="TRIP_ISSUE">🟠 ปัญหาระหว่างเดินทาง</option>
+                                <option value="BEHAVIOR">🟡 พฤติกรรม</option>
+                                <option value="PROPERTY">🔵 ทรัพย์สิน</option>
+                                <option value="TECHNICAL">⚙️ เทคนิค</option>
                                 <option value="OTHER">อื่นๆ</option>
                             </select>
                         </div>
@@ -103,9 +103,9 @@
                                 <tr>
                                     <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">ผู้แจ้ง
                                     </th>
-                                    <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">ประเภท
-                                    </th>
                                     <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">ความสำคัญ
+                                    </th>
+                                    <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">ประเภท
                                     </th>
                                     <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">หัวข้อ
                                     </th>
@@ -127,17 +127,17 @@
                                     <td class="px-4 py-3">
                                         <span
                                             class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full"
-                                            :class="typeBadge(r.incidentType)">
-                                            <i class="mr-1 fas" :class="typeIcon(r.incidentType)"></i>
-                                            {{ typeLabel(r.incidentType) }}
+                                            :class="priorityBadge(r.priority)">
+                                            <i class="mr-1 fas" :class="priorityIcon(r.priority)"></i>
+                                            {{ r.priority }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3">
                                         <span
                                             class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full"
-                                            :class="priorityBadge(r.priority)">
-                                            <i class="mr-1 fas" :class="priorityIcon(r.priority)"></i>
-                                            {{ r.priority }}
+                                            :class="typeBadge(r.incidentType)">
+                                            <i class="mr-1 fas" :class="typeIcon(r.incidentType)"></i>
+                                            {{ typeLabel(r.incidentType) }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3">
@@ -262,27 +262,27 @@ function statusIcon(s) {
 }
 
 function typeBadge(t) {
-    if (t === 'DRIVER') return 'bg-orange-100 text-orange-700'
-    if (t === 'PASSENGER') return 'bg-blue-100 text-blue-700'
-    if (t === 'ROUTE') return 'bg-emerald-100 text-emerald-700'
-    if (t === 'BOOKING') return 'bg-purple-100 text-purple-700'
-    if (t === 'SYSTEM') return 'bg-red-100 text-red-700'
+    if (t === 'SAFETY') return 'bg-red-100 text-red-700'
+    if (t === 'TRIP_ISSUE') return 'bg-orange-100 text-orange-700'
+    if (t === 'BEHAVIOR') return 'bg-yellow-100 text-yellow-700'
+    if (t === 'PROPERTY') return 'bg-blue-100 text-blue-700'
+    if (t === 'TECHNICAL') return 'bg-purple-100 text-purple-700'
     return 'bg-gray-100 text-gray-700'
 }
 function typeIcon(t) {
-    if (t === 'DRIVER') return 'fa-id-card'
-    if (t === 'PASSENGER') return 'fa-user'
-    if (t === 'ROUTE') return 'fa-route'
-    if (t === 'BOOKING') return 'fa-calendar-check'
-    if (t === 'SYSTEM') return 'fa-gear'
+    if (t === 'SAFETY') return 'fa-shield-halved'
+    if (t === 'TRIP_ISSUE') return 'fa-car-burst'
+    if (t === 'BEHAVIOR') return 'fa-user-slash'
+    if (t === 'PROPERTY') return 'fa-box-open'
+    if (t === 'TECHNICAL') return 'fa-gear'
     return 'fa-circle-question'
 }
 function typeLabel(t) {
-    if (t === 'DRIVER') return 'คนขับ'
-    if (t === 'PASSENGER') return 'ผู้โดยสาร'
-    if (t === 'ROUTE') return 'เส้นทาง'
-    if (t === 'BOOKING') return 'การจอง'
-    if (t === 'SYSTEM') return 'ระบบ'
+    if (t === 'SAFETY') return 'ความปลอดภัย'
+    if (t === 'TRIP_ISSUE') return 'ปัญหาระหว่างเดินทาง'
+    if (t === 'BEHAVIOR') return 'พฤติกรรม'
+    if (t === 'PROPERTY') return 'ทรัพย์สิน'
+    if (t === 'TECHNICAL') return 'เทคนิค'
     return 'อื่นๆ'
 }
 
