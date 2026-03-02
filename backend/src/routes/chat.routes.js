@@ -3,6 +3,7 @@ const chatController = require('../controllers/chat.controller');
 const { protect } = require('../middlewares/auth');
 const validate = require('../middlewares/validate');
 const { sendMessageSchema } = require('../validations/chat.validation');
+const chatUpload = require('../middlewares/chatUpload.middleware');
 
 const router = express.Router();
 
@@ -12,8 +13,11 @@ router.use(protect);
 // Get messages for a report
 router.get('/:reportId/messages', chatController.getMessages);
 
-// Send a message to a report chat
+// Send a text message to a report chat
 router.post('/:reportId/messages', validate(sendMessageSchema), chatController.sendMessage);
+
+// Upload file/image to a report chat
+router.post('/:reportId/upload', chatUpload.single('file'), chatController.uploadFile);
 
 // Mark messages as read
 router.patch('/:reportId/read', chatController.markRead);

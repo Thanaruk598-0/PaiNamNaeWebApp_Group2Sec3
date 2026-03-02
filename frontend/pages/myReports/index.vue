@@ -119,18 +119,12 @@
                         </div>
                     </div>
 
-                    <!-- Row 5: Map -->
+                    <!-- Row 5: Map + auto-detect -->
                     <div>
                         <label class="block mb-1 text-sm font-medium text-gray-700">
                             <i class="fas fa-map-marker-alt mr-1 text-red-400"></i>ตำแหน่งเหตุการณ์ <span class="text-red-500">*</span>
                         </label>
-                        <div class="flex items-center justify-between mb-2">
-                            <p class="text-xs text-gray-400">คลิกบนแผนที่เพื่อปักหมุดตำแหน่ง</p>
-                            <button @click="getCurrentLocation" type="button" 
-                                class="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors">
-                                <i class="fas fa-location-crosshairs"></i> ใช้ตำแหน่งปัจจุบัน
-                            </button>
-                        </div>
+                        <p class="text-xs text-gray-400 mb-2">ระบบจะดึงตำแหน่งปัจจุบันอัตโนมัติ หรือคลิกบนแผนที่เพื่อปักหมุดเอง</p>
                         <div ref="mapContainer"
                             class="w-full h-64 rounded-xl border border-gray-200 overflow-hidden bg-gray-100">
                         </div>
@@ -140,7 +134,7 @@
                                 <template v-if="form.location.address">{{ form.location.address }}</template>
                                 <template v-else>{{ form.location.lat.toFixed(6) }}, {{ form.location.lng.toFixed(6) }}</template>
                             </span>
-                            <button @click="clearLocation"
+                            <button @click="clearLocation" type="button"
                                 class="text-xs text-red-500 hover:text-red-700 cursor-pointer">
                                 <i class="fas fa-xmark mr-1"></i>ลบตำแหน่ง
                             </button>
@@ -299,18 +293,56 @@
                                 ? 'bg-blue-500 text-white rounded-br-none'
                                 : 'bg-gray-200 text-gray-800 rounded-bl-none'
                         ]">
-                            <p class="text-sm">{{ msg.content }}</p>
+                            <!-- Image attachment -->
+                            <div v-if="msg.fileUrl && msg.fileType === 'image'" class="mb-2">
+                                <img :src="msg.fileUrl" :alt="msg.fileName || 'รูปภาพ'"
+                                    class="max-w-full rounded-lg cursor-pointer hover:opacity-90 transition"
+                                    style="max-height: 200px; object-fit: cover;"
+                                    @click="openLightbox(msg.fileUrl)" />
+                            </div>
+                            <!-- File attachment -->
+                            <div v-else-if="msg.fileUrl && msg.fileType === 'file'" class="mb-2">
+                                <a :href="msg.fileUrl" target="_blank" rel="noopener"
+                                    class="inline-flex items-center gap-2 px-3 py-2 rounded-lg transition"
+                                    :class="msg.senderId === user.id ? 'bg-blue-400/30 hover:bg-blue-400/50 text-white' : 'bg-gray-300/50 hover:bg-gray-300/80 text-gray-700'">
+                                    <i class="fas fa-file-arrow-down"></i>
+                                    <span class="text-sm truncate max-w-[180px]">{{ msg.fileName || 'ดาวน์โหลดไฟล์' }}</span>
+                                </a>
+                            </div>
+                            <p v-if="msg.content" class="text-sm">{{ msg.content }}</p>
                             <p :class="['text-xs mt-1', msg.senderId === user.id ? 'text-blue-200' : 'text-gray-500']">
                                 {{ formatDate(msg.createdAt) }}
                             </p>
                         </div>
                     </div>
                 </div>
+                <!-- File Preview -->
+                <div v-if="chatFilePreview" class="px-4 py-2 border-t bg-gray-50 flex items-center gap-3">
+                    <img v-if="chatFilePreview.type === 'image'" :src="chatFilePreview.url"
+                        class="w-14 h-14 object-cover rounded-lg border border-gray-200" />
+                    <div v-else class="w-14 h-14 flex items-center justify-center bg-blue-50 rounded-lg border border-blue-200">
+                        <i class="fas fa-file text-blue-500 text-xl"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-700 truncate">{{ chatFilePreview.name }}</p>
+                        <p class="text-xs text-gray-400">{{ chatFilePreview.type === 'image' ? 'รูปภาพ' : 'ไฟล์' }}</p>
+                    </div>
+                    <button @click="removeChatFile" class="text-gray-400 hover:text-red-500 transition">
+                        <i class="fas fa-xmark text-lg"></i>
+                    </button>
+                </div>
                 <div class="p-4 border-t flex items-center gap-2">
-                    <input v-model="chatInput" @keyup.enter="sendMessage" type="text" placeholder="พิมพ์ข้อความ..." maxlength="5000"
+                    <!-- Attach file button -->
+                    <label class="w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition cursor-pointer" title="แนบรูปภาพ/ไฟล์">
+                        <i class="fas fa-paperclip text-lg"></i>
+                        <input type="file" class="hidden" ref="chatFileInput"
+                            accept="image/*"
+                            @change="onChatFileSelected" />
+                    </label>
+                    <input v-model="chatInput" @keyup.enter="sendChatMessage" type="text" placeholder="พิมพ์ข้อความ..." maxlength="5000"
                         class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                    <button @click="sendMessage" :disabled="!chatInput.trim() || isSendingMessage"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                    <button @click="sendChatMessage" :disabled="(!chatInput.trim() && !chatFile) || isSendingMessage"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition cursor-pointer">
                         <i class="fas fa-paper-plane" v-if="!isSendingMessage"></i>
                         <i class="fas fa-spinner fa-spin" v-else></i>
                     </button>
@@ -358,6 +390,9 @@ const chatMessages = ref([]) // Local messages state
 const chatInput = ref('')
 const isSendingMessage = ref(false)
 const chatContainer = ref(null)
+const chatFile = ref(null)
+const chatFilePreview = ref(null)
+const chatFileInput = ref(null)
 
 // --- Chat Functions (Mirrored from Admin) ---
 const { toast } = useToast()
@@ -441,15 +476,61 @@ async function fetchChatMessages(reportId) {
     }
 }
 
-async function sendMessage() {
-    if (!chatInput.value.trim() || isSendingMessage.value) return
+// --- Chat File Selection ---
+function onChatFileSelected(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 10 * 1024 * 1024) {
+        toast.error('ไฟล์ใหญ่เกินไป', 'ขนาดสูงสุด 10 MB')
+        return
+    }
+    chatFile.value = file
+    const isImage = file.type.startsWith('image/')
+    chatFilePreview.value = {
+        name: file.name,
+        type: isImage ? 'image' : 'file',
+        url: isImage ? URL.createObjectURL(file) : null
+    }
+}
+function removeChatFile() {
+    chatFile.value = null
+    chatFilePreview.value = null
+    if (chatFileInput.value) chatFileInput.value.value = ''
+}
+
+async function sendChatMessage() {
+    if ((!chatInput.value.trim() && !chatFile.value) || isSendingMessage.value) return
 
     isSendingMessage.value = true
     try {
         const token = getToken()
         const reportId = activeReportId.value
 
-        // Use Socket if connected
+        // If file attached, use REST upload endpoint
+        if (chatFile.value) {
+            const fd = new FormData()
+            fd.append('file', chatFile.value)
+            if (chatInput.value.trim()) fd.append('content', chatInput.value)
+
+            const res = await fetch(`${config.public.apiBase}chat/${reportId}/upload`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: fd
+            })
+            const body = await res.json()
+            if (!res.ok) throw new Error(body.message || 'อัพโหลดไม่สำเร็จ')
+            // message broadcast via socket from server, but if socket not connected add locally
+            if (!chatSocket.value?.connected) {
+                chatMessages.value.push(body.data)
+            }
+            chatInput.value = ''
+            removeChatFile()
+            isSendingMessage.value = false
+            scrollToBottom()
+            return
+        }
+
+        // Text only: Use Socket if connected
         if (chatSocket.value?.connected) {
             chatSocket.value.emit('send_message', {
                 reportId,
@@ -458,7 +539,6 @@ async function sendMessage() {
                 isSendingMessage.value = false
                 if (response.status === 'ok') {
                     chatInput.value = ''
-                    // msg added via event listener 'new_message'
                 } else {
                     toast.error('ส่งข้อความไม่สำเร็จ: ' + (response.message || 'เกิดข้อผิดพลาด'))
                 }
@@ -621,13 +701,12 @@ function initMap() {
     geocoder = new google.maps.Geocoder()
 
     async function geocodePosition(pos) {
-        // ใช้ Promise เพื่อให้รอผลลัพธ์
         return new Promise((resolve) => {
             geocoder.geocode({ location: pos }, (results, status) => {
                 if (status === 'OK' && results && results[0]) {
                     resolve(results[0].formatted_address)
                 } else {
-                    resolve('') // คืนค่าว่างถ้าไม่พบที่อยู่
+                    resolve('')
                 }
             })
         })
@@ -637,10 +716,7 @@ function initMap() {
         const pos = { lat: e.latLng.lat(), lng: e.latLng.lng() }
         marker.setPosition(pos)
         marker.setVisible(true)
-        
-        // กำหนดพิกัดเริ่มต้นไปก่อน
         form.value.location = pos
-        // ดึงชื่อสถานที่
         const address = await geocodePosition(pos)
         if (address) {
             form.value.location = { ...pos, address }
@@ -650,12 +726,14 @@ function initMap() {
     marker.addListener('dragend', async (e) => {
         const pos = { lat: e.latLng.lat(), lng: e.latLng.lng() }
         form.value.location = pos
-        
         const address = await geocodePosition(pos)
         if (address) {
             form.value.location = { ...pos, address }
         }
     })
+
+    // ดึงตำแหน่งปัจจุบันอัตโนมัติเมื่อแผนที่พร้อม
+    getCurrentLocation()
 }
 
 function getCurrentLocation() {
@@ -671,7 +749,7 @@ function getCurrentLocation() {
                 // เลื่อนแผนที่ไปที่ตำแหน่งปัจจุบัน
                 if (map) {
                     map.setCenter(pos)
-                    map.setZoom(15) // ซูมเข้าใกล้ขึ้นนิดนึง
+                    map.setZoom(15)
                 }
                 
                 // ปักหมุด

@@ -45,10 +45,15 @@ function initSocket(httpServer) {
             socket.leave(`report:${reportId}`);
         });
 
-        // Send a message
-        socket.on('send_message', async ({ reportId, content }, callback) => {
+        // Send a message (text or with file info from REST upload)
+        socket.on('send_message', async ({ reportId, content, fileUrl, fileType, fileName }, callback) => {
             try {
-                const message = await chatService.createMessage(reportId, socket.user.sub, content);
+                const message = await chatService.createMessage(
+                    reportId,
+                    socket.user.sub,
+                    content || '',
+                    { fileUrl, fileType, fileName }
+                );
                 // Broadcast to everyone in the room (including sender)
                 io.to(`report:${reportId}`).emit('new_message', message);
                 if (callback) callback({ status: 'ok', data: message });

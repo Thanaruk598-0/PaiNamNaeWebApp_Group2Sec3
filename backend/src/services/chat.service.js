@@ -31,13 +31,20 @@ const getMessages = async (reportId, opts = {}) => {
 /**
  * Create a new chat message
  */
-const createMessage = async (reportId, senderId, content) => {
+const createMessage = async (reportId, senderId, content, { fileUrl, fileType, fileName } = {}) => {
     // Verify report exists
     const report = await prisma.report.findUnique({ where: { id: reportId } });
     if (!report) throw new ApiError(404, 'Report not found');
 
     return prisma.chatMessage.create({
-        data: { reportId, senderId, content },
+        data: {
+            reportId,
+            senderId,
+            content: content || '',
+            ...(fileUrl && { fileUrl }),
+            ...(fileType && { fileType }),
+            ...(fileName && { fileName }),
+        },
     });
 };
 

@@ -269,6 +269,9 @@ model ChatMessage {
   report    Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
   senderId  String
   content   String   @db.Text
+  fileUrl   String?
+  fileType  String?  // "image" | "file"
+  fileName  String?
   readAt    DateTime?
   createdAt DateTime @default(now())
 

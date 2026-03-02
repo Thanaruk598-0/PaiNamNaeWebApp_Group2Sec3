@@ -261,7 +261,24 @@
                                             ? 'bg-blue-600 text-white rounded-br-none' 
                                             : 'bg-white text-gray-800 border border-gray-200 rounded-bl-none'">
                                         
-                                        <p>{{ msg.content }}</p>
+                                        <!-- Image attachment -->
+                                        <div v-if="msg.fileUrl && msg.fileType === 'image'" class="mb-2">
+                                            <img :src="msg.fileUrl" :alt="msg.fileName || 'รูปภาพ'"
+                                                class="max-w-full rounded-lg cursor-pointer hover:opacity-90 transition"
+                                                style="max-height: 200px; object-fit: cover;"
+                                                @click="lightboxUrl = msg.fileUrl" />
+                                        </div>
+                                        <!-- File attachment -->
+                                        <div v-else-if="msg.fileUrl && msg.fileType === 'file'" class="mb-2">
+                                            <a :href="msg.fileUrl" target="_blank" rel="noopener"
+                                                class="inline-flex items-center gap-2 px-3 py-2 rounded-lg transition"
+                                                :class="msg.senderId === user?.id ? 'bg-blue-500/30 hover:bg-blue-500/50 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'">
+                                                <i class="fas fa-file-arrow-down"></i>
+                                                <span class="text-sm truncate max-w-[180px]">{{ msg.fileName || 'ดาวน์โหลดไฟล์' }}</span>
+                                            </a>
+                                        </div>
+
+                                        <p v-if="msg.content">{{ msg.content }}</p>
                                         
                                         <!-- Timestamp -->
                                         <div class="text-[10px] mt-1 flex items-center gap-1"
@@ -278,9 +295,32 @@
                                 </div>
                             </div>
 
+                            <!-- File Preview -->
+                            <div v-if="chatFilePreview" class="px-4 py-2 border-t bg-gray-50 flex items-center gap-3">
+                                <img v-if="chatFilePreview.type === 'image'" :src="chatFilePreview.url"
+                                    class="w-14 h-14 object-cover rounded-lg border border-gray-200" />
+                                <div v-else class="w-14 h-14 flex items-center justify-center bg-blue-50 rounded-lg border border-blue-200">
+                                    <i class="fas fa-file text-blue-500 text-xl"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm text-gray-700 truncate">{{ chatFilePreview.name }}</p>
+                                    <p class="text-xs text-gray-400">{{ chatFilePreview.type === 'image' ? 'รูปภาพ' : 'ไฟล์' }}</p>
+                                </div>
+                                <button @click="removeChatFile" class="text-gray-400 hover:text-red-500 transition cursor-pointer">
+                                    <i class="fas fa-xmark text-lg"></i>
+                                </button>
+                            </div>
+
                             <!-- Input Area -->
                             <div class="p-4 bg-white border-t border-gray-200">
                                 <form @submit.prevent="sendMessage" class="flex gap-2">
+                                    <!-- Attach file button -->
+                                    <label class="w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition cursor-pointer shrink-0" title="แนบรูปภาพ/ไฟล์">
+                                        <i class="fas fa-paperclip text-lg"></i>
+                                        <input type="file" class="hidden" ref="chatFileInput"
+                                            accept="image/*"
+                                            @change="onChatFileSelected" />
+                                    </label>
                                     <input v-model="chatInput" 
                                         type="text" 
                                         placeholder="พิมพ์ข้อความ... (กด Enter เพื่อส่ง)" 
@@ -289,7 +329,7 @@
                                     
                                     <button type="submit" 
                                         class="w-10 h-10 flex items-center justify-center rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-sm"
-                                        :disabled="!chatInput.trim() || isSendingMessage">
+                                        :disabled="(!chatInput.trim() && !chatFile) || isSendingMessage">
                                         <i class="fas fa-paper-plane" v-if="!isSendingMessage"></i>
                                         <i class="fas fa-spinner fa-spin" v-else></i>
                                     </button>
@@ -359,6 +399,9 @@ const chatMessages = ref([])
 const chatInput = ref('')
 const isSendingMessage = ref(false)
 const chatRef = ref(null)
+const chatFile = ref(null)
+const chatFilePreview = ref(null)
+const chatFileInput = ref(null)
 
 const GMAPS_CB = '__initDetailMap__'
 
@@ -699,13 +742,59 @@ async function fetchChatMessages() {
     }
 }
 
+// --- Chat File Selection ---
+function onChatFileSelected(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 10 * 1024 * 1024) {
+        toast.error('ไฟล์ใหญ่เกินไป', 'ขนาดสูงสุด 10 MB')
+        return
+    }
+    chatFile.value = file
+    const isImage = file.type.startsWith('image/')
+    chatFilePreview.value = {
+        name: file.name,
+        type: isImage ? 'image' : 'file',
+        url: isImage ? URL.createObjectURL(file) : null
+    }
+}
+function removeChatFile() {
+    chatFile.value = null
+    chatFilePreview.value = null
+    if (chatFileInput.value) chatFileInput.value.value = ''
+}
+
 async function sendMessage() {
-    if (!chatInput.value.trim() || isSendingMessage.value) return
+    if ((!chatInput.value.trim() && !chatFile.value) || isSendingMessage.value) return
 
     isSendingMessage.value = true
     try {
         const token = getToken()
-        // Use Socket if connected
+
+        // If file attached, use REST upload endpoint
+        if (chatFile.value) {
+            const fd = new FormData()
+            fd.append('file', chatFile.value)
+            if (chatInput.value.trim()) fd.append('content', chatInput.value)
+
+            const res = await fetch(`${config.public.apiBase}chat/${reportId}/upload`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: fd
+            })
+            const body = await res.json()
+            if (!res.ok) throw new Error(body.message || 'อัพโหลดไม่สำเร็จ')
+            if (!chatSocket.value?.connected) {
+                chatMessages.value.push(body.data)
+            }
+            chatInput.value = ''
+            removeChatFile()
+            isSendingMessage.value = false
+            scrollToBottom()
+            return
+        }
+
+        // Text only: Use Socket if connected
         if (chatSocket.value?.connected) {
             chatSocket.value.emit('send_message', {
                 reportId,
@@ -714,7 +803,6 @@ async function sendMessage() {
                 isSendingMessage.value = false
                 if (response.status === 'ok') {
                     chatInput.value = ''
-                    // msg added via event
                 }
             })
         } else {

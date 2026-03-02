@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const chatService = require('../services/chat.service');
+const { uploadToCloudinary } = require('../utils/cloudinary');
 
 /** GET /api/chat/:reportId/messages */
 const getMessages = asyncHandler(async (req, res) => {
@@ -18,6 +19,40 @@ const sendMessage = asyncHandler(async (req, res) => {
     const { content } = req.body;
 
     const message = await chatService.createMessage(reportId, senderId, content);
+    res.status(201).json({ status: 'success', data: message });
+});
+
+/** POST /api/chat/:reportId/upload — ส่งข้อความพร้อมไฟล์แนบ */
+const uploadFile = asyncHandler(async (req, res) => {
+    const { reportId } = req.params;
+    const senderId = req.user.sub;
+    const content = req.body.content || '';
+
+    if (!req.file) {
+        return res.status(400).json({ status: 'error', message: 'กรุณาแนบไฟล์' });
+    }
+
+    // Upload to Cloudinary
+    const result = await uploadToCloudinary(req.file.buffer, 'painamnae/chat');
+    const fileType = req.file.mimetype.startsWith('image/') ? 'image' : 'file';
+
+    const message = await chatService.createMessage(reportId, senderId, content, {
+        fileUrl: result.url,
+        fileType,
+        fileName: req.file.originalname,
+    });
+
+    // Emit via Socket.IO if available
+    try {
+        const { getIO } = require('../socket');
+        const io = getIO();
+        if (io) {
+            io.to(`report:${reportId}`).emit('new_message', message);
+        }
+    } catch (e) {
+        // Socket not initialized, skip
+    }
+
     res.status(201).json({ status: 'success', data: message });
 });
 
@@ -42,6 +77,7 @@ const getUnreadCount = asyncHandler(async (req, res) => {
 module.exports = {
     getMessages,
     sendMessage,
+    uploadFile,
     markRead,
     getUnreadCount,
 };
