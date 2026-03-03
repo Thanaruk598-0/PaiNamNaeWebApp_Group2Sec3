@@ -4,18 +4,30 @@ const { uploadToCloudinary } = require('../utils/cloudinary');
 
 /** POST /reports — User creates a new report */
 const createReport = asyncHandler(async (req, res) => {
-    let imageUrl = null;
+    let attachments = [];
 
-    // Upload image to Cloudinary if provided
-    if (req.file) {
-        const result = await uploadToCloudinary(req.file.buffer, 'painamnae/reports');
-        imageUrl = result.url;
+    // ถ้ามีไฟล์แนบ
+    if (req.files && req.files.length > 0) {
+        const uploadPromises = req.files.map(file =>
+            uploadToCloudinary(file.buffer, 'painamnae/reports')
+        );
+
+        const results = await Promise.all(uploadPromises);
+
+        attachments = results.map(result => ({
+            url: result.url,
+            resourceType: result.resource_type, // image / video / raw
+        }));
     }
 
-    // Parse location if sent as string (from multipart form)
+    // Parse location ถ้าส่งมาเป็น string (multipart/form-data)
     let location = req.body.location;
     if (typeof location === 'string') {
-        try { location = JSON.parse(location); } catch { location = null; }
+        try {
+            location = JSON.parse(location);
+        } catch {
+            location = null;
+        }
     }
 
     const reportData = {
@@ -24,12 +36,17 @@ const createReport = asyncHandler(async (req, res) => {
         title: req.body.title,
         description: req.body.description,
         location: location || null,
-        imageUrl,
+        attachments,
         bookingId: req.body.bookingId || null,
     };
 
     const report = await reportService.createReport(reportData, req.user.sub);
-    res.status(201).json({ success: true, message: 'Report created', data: report });
+
+    res.status(201).json({
+        success: true,
+        message: 'Report created',
+        data: report
+    });
 });
 
 /** GET /reports/me — User gets their own reports */

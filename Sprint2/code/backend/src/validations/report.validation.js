@@ -21,6 +21,7 @@ const createReportSchema = z.object({
         try { return JSON.parse(val); } catch { return val; }
     }).pipe(locationSchema)]),
     bookingId: z.string().cuid({ message: 'Invalid booking ID format' }).optional().nullable(),
+    attachments: z.any().optional(),
 });
 
 const updateReportStatusSchema = z.object({

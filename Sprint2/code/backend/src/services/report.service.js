@@ -27,7 +27,7 @@ const createReport = async (data, userId) => {
             title: data.title,
             description: data.description,
             location: data.location,
-            imageUrl: data.imageUrl || null,
+            attachments: data.attachments || null,
         },
         include: {
             user: {

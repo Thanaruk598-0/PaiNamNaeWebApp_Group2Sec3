@@ -1,7 +1,7 @@
 const express = require('express');
 const validate = require('../middlewares/validate');
 const { protect, requireAdmin } = require('../middlewares/auth');
-const upload = require('../middlewares/upload.middleware');
+const uploadReport = require('../middlewares/uploadReport.middleware');
 const reportController = require('../controllers/report.controller');
 const {
     createReportSchema,
@@ -61,7 +61,7 @@ router.get(
 router.post(
     '/',
     protect,
-    upload.single('image'),
+    uploadReport.array('attachments', 5), 
     validate({ body: createReportSchema }),
     reportController.createReport
 );
