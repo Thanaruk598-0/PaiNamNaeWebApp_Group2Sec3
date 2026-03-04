@@ -86,8 +86,14 @@ const getMyReports = async (userId) => {
         where: { userId },
         orderBy: { createdAt: 'desc' },
         include: {
+            user: {
+                select: { id: true, firstName: true, lastName: true, email: true },
+            },
             booking: {
                 include: {
+                    passenger: {
+                        select: { id: true, firstName: true, lastName: true, email: true, profilePicture: true },
+                    },
                     route: {
                         select: {
                             id: true,
@@ -95,6 +101,9 @@ const getMyReports = async (userId) => {
                             endLocation: true,
                             departureTime: true,
                             routeSummary: true,
+                            driver: {
+                                select: { id: true, firstName: true, lastName: true, email: true, profilePicture: true },
+                            },
                         },
                     },
                 },
@@ -158,10 +167,14 @@ const getAllReports = async (opts = {}) => {
                         email: true,
                         username: true,
                         profilePicture: true,
+                        phoneNumber: true,
                     },
                 },
                 booking: {
                     include: {
+                        passenger: {
+                            select: { id: true, firstName: true, lastName: true, email: true, profilePicture: true, phoneNumber: true },
+                        },
                         route: {
                             select: {
                                 id: true,
@@ -169,6 +182,9 @@ const getAllReports = async (opts = {}) => {
                                 endLocation: true,
                                 departureTime: true,
                                 routeSummary: true,
+                                driver: {
+                                    select: { id: true, firstName: true, lastName: true, email: true, profilePicture: true, phoneNumber: true },
+                                },
                             },
                         },
                     },
@@ -214,6 +230,9 @@ const getReportById = async (id) => {
                             departureTime: true,
                             routeSummary: true,
                             status: true,
+                            driver: {
+                                select: { id: true, firstName: true, lastName: true, email: true, profilePicture: true, phoneNumber: true },
+                            },
                         },
                     },
                     passenger: {
@@ -223,6 +242,7 @@ const getReportById = async (id) => {
                             lastName: true,
                             email: true,
                             profilePicture: true,
+                            phoneNumber: true,
                         },
                     },
                 },
