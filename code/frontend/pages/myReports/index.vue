@@ -1175,12 +1175,13 @@ function handleFileChange(event) {
 
   files.forEach((file) => {
     if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
-      alert("อนุญาตเฉพาะรูปภาพและวิดีโอเท่านั้น");
+      // replace native alert with toast notification so it appears in bottom-right
+      toast.error("อนุญาตเฉพาะรูปภาพและวิดีโอเท่านั้น");
       return;
     }
 
     if (selectedFiles.value.length >= 5) {
-      alert("อัปโหลดได้สูงสุด 5 ไฟล์");
+      toast.error("อัปโหลดได้สูงสุด 5 ไฟล์");
       return;
     }
 
@@ -1642,7 +1643,20 @@ function tripLabel(trip) {
     ? dayjs(trip.route.departureTime).format("D MMM BBBB HH:mm")
     : "";
   const role = trip.userRole === "DRIVER" ? "[คนขับ]" : "[ผู้โดยสาร]";
-  return `${role} ${start} → ${end} (${date})`;
+
+  // include name(s) of the other party involved in this booking
+  let participantInfo = "";
+  if (trip.userRole === "PASSENGER" && trip.route?.driver) {
+    const d = trip.route.driver;
+    participantInfo = `คนขับ: ${d.firstName} ${d.lastName}`;
+  } else if (trip.userRole === "DRIVER" && trip.passenger) {
+    const p = trip.passenger;
+    participantInfo = `ผู้โดยสาร: ${p.firstName} ${p.lastName}`;
+  }
+
+  return `${role} ${start} → ${end} (${date})${
+    participantInfo ? " – " + participantInfo : ""
+  }`;
 }
 
 async function fetchMyTrips() {
