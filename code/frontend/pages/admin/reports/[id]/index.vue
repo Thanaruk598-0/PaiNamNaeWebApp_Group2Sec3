@@ -69,10 +69,12 @@
                     <p class="mt-1 text-gray-900 font-medium">
                       {{ reportedUser.firstName }} {{ reportedUser.lastName }}
                     </p>
-                    <p class="text-sm text-gray-500">{{ reportedUser.email }}</p>
+                    <p class="text-sm text-gray-500">
+                      {{ reportedUser.email }}
+                    </p>
                     <p class="text-sm text-gray-500">
                       <i class="fas fa-phone mr-1"></i
-                      >{{ reportedUser.phoneNumber || '-' }}
+                      >{{ reportedUser.phoneNumber || "-" }}
                     </p>
                   </template>
                   <p v-else class="mt-1 text-gray-400">-</p>
@@ -405,19 +407,7 @@
 
               <hr class="border-gray-200" />
 
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label class="text-xs font-medium text-gray-500 uppercase"
-                    >ผู้โดยสาร</label
-                  >
-                  <p class="mt-1 text-gray-900">
-                    {{ report.booking.passenger?.firstName || "-" }}
-                    {{ report.booking.passenger?.lastName || "" }}
-                  </p>
-                  <p class="text-sm text-gray-500">
-                    {{ report.booking.passenger?.email }}
-                  </p>
-                </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="text-xs font-medium text-gray-500 uppercase"
                     >คนขับ</label
@@ -441,6 +431,78 @@
                     >
                       {{ bookingStatusLabel(report.booking.status) }}
                     </span>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="border-gray-200" />
+
+              <!-- Passengers List -->
+              <div>
+                <label
+                  class="text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >ผู้โดยสารที่เกี่ยวข้อง</label
+                >
+                <div class="mt-3 space-y-2">
+                  <div
+                    v-if="
+                      report.booking?.route?.bookings &&
+                      report.booking.route.bookings.length > 0
+                    "
+                    class="grid grid-cols-1 gap-2"
+                  >
+                    <div
+                      v-for="booking in report.booking.route.bookings"
+                      :key="booking.id"
+                      class="flex items-start gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                      :class="{
+                        'ring-2 ring-blue-400':
+                          booking.passengerId === report.userId ||
+                          booking.passengerId === reportedUser?.id,
+                      }"
+                    >
+                      <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900">
+                          {{ booking.passenger?.firstName || "-" }}
+                          {{ booking.passenger?.lastName || "" }}
+                        </p>
+                        <p class="text-sm text-gray-600 truncate">
+                          <i class="fas fa-envelope mr-1 text-gray-400"></i
+                          >{{ booking.passenger?.email }}
+                        </p>
+                        <p
+                          v-if="booking.passenger?.phoneNumber"
+                          class="text-sm text-gray-600"
+                        >
+                          <i class="fas fa-phone mr-1 text-gray-400"></i
+                          >{{ booking.passenger.phoneNumber }}
+                        </p>
+                      </div>
+                      <div
+                        v-if="booking.passengerId === report.userId"
+                        class="shrink-0"
+                      >
+                        <span
+                          class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-blue-600 text-white"
+                        >
+                          <i class="fas fa-flag mr-1"></i>ผู้แจ้ง
+                        </span>
+                      </div>
+                      <div
+                        v-else-if="booking.passengerId === reportedUser?.id"
+                        class="shrink-0"
+                      >
+                        <span
+                          class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full bg-red-600 text-white"
+                        >
+                          <i class="fas fa-exclamation-circle mr-1"></i
+                          >ผู้ถูกแจ้ง
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else class="text-sm text-gray-500 italic">
+                    ไม่มีข้อมูลผู้โดยสาร
                   </div>
                 </div>
               </div>

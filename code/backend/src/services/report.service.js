@@ -233,6 +233,21 @@ const getReportById = async (id) => {
                             driver: {
                                 select: { id: true, firstName: true, lastName: true, email: true, profilePicture: true, phoneNumber: true },
                             },
+                            bookings: {
+                                include: {
+                                    passenger: {
+                                        select: {
+                                            id: true,
+                                            firstName: true,
+                                            lastName: true,
+                                            email: true,
+                                            profilePicture: true,
+                                            phoneNumber: true,
+                                        },
+                                    },
+                                },
+                                orderBy: { createdAt: 'asc' },
+                            },
                         },
                     },
                     passenger: {
