@@ -43,8 +43,8 @@
             </div>
 
             <div class="px-6 py-5 space-y-4">
-              <!-- Reporter + Date -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Reporter + Reported + Date -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label class="text-xs font-medium text-gray-500 uppercase"
                     >ผู้แจ้ง</label
@@ -60,6 +60,22 @@
                     <i class="fas fa-phone mr-1"></i
                     >{{ report.user.phoneNumber }}
                   </p>
+                </div>
+                <div>
+                  <label class="text-xs font-medium text-gray-500 uppercase"
+                    >ผู้ถูกแจ้ง</label
+                  >
+                  <template v-if="reportedUser">
+                    <p class="mt-1 text-gray-900 font-medium">
+                      {{ reportedUser.firstName }} {{ reportedUser.lastName }}
+                    </p>
+                    <p class="text-sm text-gray-500">{{ reportedUser.email }}</p>
+                    <p class="text-sm text-gray-500">
+                      <i class="fas fa-phone mr-1"></i
+                      >{{ reportedUser.phoneNumber || '-' }}
+                    </p>
+                  </template>
+                  <p v-else class="mt-1 text-gray-400">-</p>
                 </div>
                 <div>
                   <label class="text-xs font-medium text-gray-500 uppercase"
@@ -404,6 +420,18 @@
                 </div>
                 <div>
                   <label class="text-xs font-medium text-gray-500 uppercase"
+                    >คนขับ</label
+                  >
+                  <p class="mt-1 text-gray-900">
+                    {{ report.booking.route?.driver?.firstName || "-" }}
+                    {{ report.booking.route?.driver?.lastName || "" }}
+                  </p>
+                  <p class="text-sm text-gray-500">
+                    {{ report.booking.route?.driver?.email }}
+                  </p>
+                </div>
+                <div>
+                  <label class="text-xs font-medium text-gray-500 uppercase"
                     >สถานะ Booking</label
                   >
                   <div class="mt-1">
@@ -414,14 +442,6 @@
                       {{ bookingStatusLabel(report.booking.status) }}
                     </span>
                   </div>
-                </div>
-                <div>
-                  <label class="text-xs font-medium text-gray-500 uppercase"
-                    >จำนวนที่นั่ง</label
-                  >
-                  <p class="mt-1 text-gray-900">
-                    {{ report.booking.numberOfSeats }} ที่นั่ง
-                  </p>
                 </div>
               </div>
             </div>
@@ -721,7 +741,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick, watch } from "vue";
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { useCookie, useRuntimeConfig, useRoute } from "#app";
 import dayjs from "dayjs";
 import "dayjs/locale/th";
@@ -754,6 +774,18 @@ const lightbox = ref({
   type: null, // 'image' | 'video'
 });
 const detailMapContainer = ref(null);
+
+// Computed: ผู้ถูกแจ้ง (reported user)
+const reportedUser = computed(() => {
+  const r = report.value;
+  if (!r?.booking) return null;
+  // ถ้าผู้แจ้ง = ผู้โดยสาร → ผู้ถูกแจ้ง = คนขับ
+  if (r.userId === r.booking.passengerId) {
+    return r.booking.route?.driver || null;
+  }
+  // ถ้าผู้แจ้ง = คนขับ → ผู้ถูกแจ้ง = ผู้โดยสาร
+  return r.booking.passenger || null;
+});
 
 // Chat
 const { user } = useAuth();
