@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.1 (Python 3.12.8 on win32)" generated="2026-03-04T17:53:52.902261" rpa="false" schemaversion="5">
+<suite id="s1" name="Tc15" source="C:\SE\Sprint2\Test\Code\TS009_2_Admin sent messages to the Users\tc15.robot">
+<kw name="Open Browser To Login" type="SETUP">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:53:53.074060" level="INFO">Opening browser 'chrome' to base url 'http://localhost:3001/login'.</msg>
+<arg>${URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-03-04T17:53:53.074060" elapsed="1.561896"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-03-04T17:53:54.635956" elapsed="0.025179"/>
+</kw>
+<kw name="Set Selenium Speed" owner="SeleniumLibrary">
+<arg>1s</arg>
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<status status="PASS" start="2026-03-04T17:53:54.661135" elapsed="0.000000"/>
+</kw>
+<status status="PASS" start="2026-03-04T17:53:53.074060" elapsed="1.587075"/>
+</kw>
+<test id="s1-t1" name="Admin Send Chat Message To User Successfully" line="15">
+<kw name="Login As Admin">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id=identifier</arg>
+<arg>15s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-04T17:53:54.662135" elapsed="2.017675"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:53:56.680315" level="INFO">Typing text 'admin123' into text field 'id=identifier'.</msg>
+<arg>id=identifier</arg>
+<arg>${USERNAME}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-04T17:53:56.679810" elapsed="3.102426"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:53:59.782741" level="INFO">Typing text '123456789' into text field 'xpath=//input[@type="password"]'.</msg>
+<arg>xpath=//input[@type="password"]</arg>
+<arg>${PASSWORD}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-04T17:53:59.782236" elapsed="3.068340"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:02.850576" level="INFO">Clicking element 'xpath=//button[@type="submit"]'.</msg>
+<arg>xpath=//button[@type="submit"]</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-04T17:54:02.850576" elapsed="2.074455"/>
+</kw>
+<kw name="Wait Until Page Does Not Contain Element" owner="SeleniumLibrary">
+<arg>id=identifier</arg>
+<arg>15s</arg>
+<doc>Waits until the element ``locator`` disappears from the current page.</doc>
+<status status="PASS" start="2026-03-04T17:54:04.925031" elapsed="1.009050"/>
+</kw>
+<status status="PASS" start="2026-03-04T17:53:54.662135" elapsed="11.271946"/>
+</kw>
+<kw name="Open Report Management">
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:05.935089" level="INFO">Opening url 'http://localhost:3001/admin/reports'</msg>
+<arg>${REPORT_URL}</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-03-04T17:54:05.935089" elapsed="2.340268"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>reports</arg>
+<arg>10s</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-03-04T17:54:08.275357" elapsed="1.003782"/>
+</kw>
+<status status="PASS" start="2026-03-04T17:54:05.934081" elapsed="3.345058"/>
+</kw>
+<kw name="Open Report Detail">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=(//button[@title="ดู/แก้ไข"])[1]</arg>
+<arg>15s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-04T17:54:09.279139" elapsed="2.018926"/>
+</kw>
+<kw name="Scroll Element Into View" owner="SeleniumLibrary">
+<arg>xpath=(//button[@title="ดู/แก้ไข"])[1]</arg>
+<doc>Scrolls the element identified by ``locator`` into view.</doc>
+<status status="PASS" start="2026-03-04T17:54:11.298065" elapsed="2.293318"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:14.678367" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="before_open_detail.png"&gt;&lt;img src="before_open_detail.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>before_open_detail.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T17:54:13.591383" elapsed="1.086984"/>
+</kw>
+<kw name="Execute Javascript" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:14.679367" level="INFO">Executing JavaScript:
+document.querySelectorAll("button[title='ดู/แก้ไข']")[0].click();
+Without any arguments.</msg>
+<arg>document.querySelectorAll("button[title='ดู/แก้ไข']")[0].click();</arg>
+<doc>Executes the given JavaScript code with possible arguments.</doc>
+<status status="PASS" start="2026-03-04T17:54:14.678367" elapsed="1.014502"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/admin/reports/</arg>
+<arg>15s</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-03-04T17:54:15.692869" elapsed="1.011811"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:17.804777" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="report_detail.png"&gt;&lt;img src="report_detail.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>report_detail.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T17:54:16.704680" elapsed="1.100097"/>
+</kw>
+<status status="PASS" start="2026-03-04T17:54:09.279139" elapsed="8.525638"/>
+</kw>
+<kw name="Send Chat Message As Admin">
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>/admin/reports/</arg>
+<arg>15s</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-03-04T17:54:17.804777" elapsed="1.003728"/>
+</kw>
+<kw name="Execute Javascript" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:18.808505" level="INFO">Executing JavaScript:
+window.scrollTo(0, document.body.scrollHeight);
+Without any arguments.</msg>
+<arg>window.scrollTo(0, document.body.scrollHeight);</arg>
+<doc>Executes the given JavaScript code with possible arguments.</doc>
+<status status="PASS" start="2026-03-04T17:54:18.808505" elapsed="1.008148"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-03-04T17:54:20.816693" level="INFO">Slept 1 second.</msg>
+<arg>1s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-03-04T17:54:19.816653" elapsed="1.000040"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//input[contains(@placeholder,"พิมพ์ข้อความ")]</arg>
+<arg>20s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-04T17:54:20.816693" elapsed="2.025016"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:23.939312" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="chat_box_visible.png"&gt;&lt;img src="chat_box_visible.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>chat_box_visible.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T17:54:22.841709" elapsed="1.097603"/>
+</kw>
+<kw name="Execute Javascript" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:23.939312" level="INFO">Executing JavaScript:
+var input = document.querySelector("input[placeholder*='พิมพ์ข้อความ']");input.focus();input.value = "รบกวนขอภาพหลักฐานเพิ่มเติมด้วยครับ";input.dispatchEvent(new Event('input', { bubbles: true }));
+Without any arguments.</msg>
+<arg>var input = document.querySelector("input[placeholder*='พิมพ์ข้อความ']");</arg>
+<arg>input.focus();</arg>
+<arg>input.value = "${ADMIN_MESSAGE}";</arg>
+<arg>input.dispatchEvent(new Event('input', { bubbles: true }));</arg>
+<doc>Executes the given JavaScript code with possible arguments.</doc>
+<status status="PASS" start="2026-03-04T17:54:23.939312" elapsed="1.012389"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:26.026133" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="message_typed.png"&gt;&lt;img src="message_typed.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>message_typed.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T17:54:24.951701" elapsed="1.074432"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-03-04T17:54:27.026710" level="INFO">Slept 1 second.</msg>
+<arg>1s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-03-04T17:54:26.026133" elapsed="1.000577"/>
+</kw>
+<kw name="Execute Javascript" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:27.026710" level="INFO">Executing JavaScript:
+document.querySelector("button[type='submit']").click();
+Without any arguments.</msg>
+<arg>document.querySelector("button[type='submit']").click();</arg>
+<doc>Executes the given JavaScript code with possible arguments.</doc>
+<status status="PASS" start="2026-03-04T17:54:27.026710" elapsed="1.007883"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:29.112912" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="message_sent.png"&gt;&lt;img src="message_sent.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>message_sent.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T17:54:28.034593" elapsed="1.078319"/>
+</kw>
+<status status="PASS" start="2026-03-04T17:54:17.804777" elapsed="11.308135"/>
+</kw>
+<kw name="Verify Admin Message Sent">
+<kw name="Wait Until Page Contains Element" owner="SeleniumLibrary">
+<arg>xpath=//*[contains(text(),"${ADMIN_MESSAGE}")]</arg>
+<arg>20s</arg>
+<doc>Waits until the element ``locator`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-04T17:54:29.113912" elapsed="1.014915"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T17:54:31.200258" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="verify_success.png"&gt;&lt;img src="verify_success.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>verify_success.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T17:54:30.128827" elapsed="1.071431"/>
+</kw>
+<status status="PASS" start="2026-03-04T17:54:29.113912" elapsed="2.086346"/>
+</kw>
+<status status="PASS" start="2026-03-04T17:53:54.661135" elapsed="36.539123"/>
+</test>
+<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-03-04T17:54:31.201263" elapsed="3.090640"/>
+</kw>
+<status status="PASS" start="2026-03-04T17:53:52.903262" elapsed="41.388641"/>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Tc15" id="s1" pass="1" fail="0" skip="0">Tc15</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
