@@ -103,6 +103,8 @@
                                 <tr>
                                     <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">ผู้แจ้ง
                                     </th>
+                                    <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">ผู้ถูกแจ้ง
+                                    </th>
                                     <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">ความสำคัญ
                                     </th>
                                     <th class="px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">ประเภท
@@ -123,6 +125,16 @@
                                         <div class="font-medium text-gray-900">{{ r.user?.firstName }} {{
                                             r.user?.lastName }}</div>
                                         <div class="text-xs text-gray-500">{{ r.user?.email || '-' }}</div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <template v-if="getReportedUser(r)">
+                                            <div class="font-medium text-gray-900">{{ getReportedUser(r).firstName }} {{ getReportedUser(r).lastName }}</div>
+                                            <div class="text-xs text-gray-500">{{ getReportedUser(r).email || '-' }}</div>
+                                            <div v-if="getReportedUser(r).phoneNumber" class="text-xs text-gray-500">
+                                                <i class="fas fa-phone mr-1"></i>{{ getReportedUser(r).phoneNumber || '-' }}
+                                            </div>
+                                        </template>
+                                        <span v-else class="text-gray-400">-</span>
                                     </td>
                                     <td class="px-4 py-3">
                                         <span
@@ -167,7 +179,7 @@
                                     </td>
                                 </tr>
                                 <tr v-if="!pagedReports.length">
-                                    <td colspan="7" class="px-4 py-10 text-center text-gray-500">ไม่มีข้อมูลรายงาน</td>
+                                    <td colspan="8" class="px-4 py-10 text-center text-gray-500">ไม่มีข้อมูลรายงาน</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -299,6 +311,16 @@ function priorityIcon(p) {
     if (p === 'HIGH') return 'fa-circle-up'
     if (p === 'CRITICAL') return 'fa-circle-exclamation'
     return 'fa-circle'
+}
+
+function getReportedUser(r) {
+    if (!r.booking) return null
+    // ถ้าผู้แจ้ง = ผู้โดยสาร → ผู้ถูกแจ้ง = คนขับ
+    if (r.userId === r.booking.passengerId) {
+        return r.booking.route?.driver || null
+    }
+    // ถ้าผู้แจ้ง = คนขับ → ผู้ถูกแจ้ง = ผู้โดยสาร
+    return r.booking.passenger || null
 }
 
 function formatDate(iso) {
