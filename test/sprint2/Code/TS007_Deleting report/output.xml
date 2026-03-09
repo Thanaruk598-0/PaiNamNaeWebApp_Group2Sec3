@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 7.4.1 (Python 3.12.8 on win32)" generated="2026-03-04T14:51:31.466689" rpa="false" schemaversion="5">
+<suite id="s1" name="Tc11" source="C:\SE\Sprint2\Test\Code\TS007_Deleting report\tc11.robot">
+<kw name="Open Browser To Login Page" type="SETUP">
+<kw name="Open Browser" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:51:31.961142" level="INFO">Opening browser 'chrome' to base url 'http://localhost:3001/login'.</msg>
+<arg>${URL}</arg>
+<arg>${BROWSER}</arg>
+<doc>Opens a new browser instance to the optional ``url``.</doc>
+<status status="PASS" start="2026-03-04T14:51:31.960143" elapsed="2.274898"/>
+</kw>
+<kw name="Maximize Browser Window" owner="SeleniumLibrary">
+<doc>Maximizes current browser window.</doc>
+<status status="PASS" start="2026-03-04T14:51:34.235593" elapsed="0.028752"/>
+</kw>
+<kw name="Set Selenium Speed" owner="SeleniumLibrary">
+<arg>1s</arg>
+<doc>Sets the delay that is waited after each Selenium command.</doc>
+<status status="PASS" start="2026-03-04T14:51:34.264345" elapsed="0.000000"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:51:35.497440" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="delete_login_open.png"&gt;&lt;img src="delete_login_open.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>delete_login_open.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T14:51:34.265342" elapsed="1.233098"/>
+</kw>
+<status status="PASS" start="2026-03-04T14:51:31.959143" elapsed="3.539297"/>
+</kw>
+<test id="s1-t1" name="Verify Admin Can Delete Report Successfully" line="13">
+<kw name="Login To System">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>id=identifier</arg>
+<arg>15s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-04T14:51:35.500441" elapsed="2.044939"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:51:38.800978" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="delete_login_page.png"&gt;&lt;img src="delete_login_page.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>delete_login_page.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T14:51:37.545380" elapsed="1.256599"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:51:38.802978" level="INFO">Typing text 'admin123' into text field 'id=identifier'.</msg>
+<arg>id=identifier</arg>
+<arg>${USERNAME}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-04T14:51:38.801979" elapsed="3.205608"/>
+</kw>
+<kw name="Input Text" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:51:42.008117" level="INFO">Typing text '123456789' into text field 'xpath=//input[@type="password"]'.</msg>
+<arg>xpath=//input[@type="password"]</arg>
+<arg>${PASSWORD}</arg>
+<doc>Types the given ``text`` into the text field identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-04T14:51:42.008117" elapsed="3.197349"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:51:46.438338" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="delete_login_filled.png"&gt;&lt;img src="delete_login_filled.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>delete_login_filled.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T14:51:45.205986" elapsed="1.232352"/>
+</kw>
+<kw name="Click Element" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:51:46.439338" level="INFO">Clicking element 'xpath=//button[normalize-space()="เข้าสู่ระบบ"]'.</msg>
+<arg>xpath=//button[normalize-space()="เข้าสู่ระบบ"]</arg>
+<doc>Click the element identified by ``locator``.</doc>
+<status status="PASS" start="2026-03-04T14:51:46.439338" elapsed="2.116355"/>
+</kw>
+<kw name="Wait Until Element Is Not Visible" owner="SeleniumLibrary">
+<arg>id=identifier</arg>
+<arg>15s</arg>
+<doc>Waits until the element ``locator`` is not visible.</doc>
+<status status="PASS" start="2026-03-04T14:51:48.556212" elapsed="1.031124"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:51:51.206657" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="delete_login_success.png"&gt;&lt;img src="delete_login_success.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>delete_login_success.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T14:51:49.587336" elapsed="1.620321"/>
+</kw>
+<status status="PASS" start="2026-03-04T14:51:35.499442" elapsed="15.708215"/>
+</kw>
+<kw name="Go To Report Management">
+<kw name="Go To" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:51:51.209656" level="INFO">Opening url 'http://localhost:3001/admin/reports'</msg>
+<arg>http://localhost:3001/admin/reports</arg>
+<doc>Navigates the current browser window to the provided ``url``.</doc>
+<status status="PASS" start="2026-03-04T14:51:51.209656" elapsed="2.418953"/>
+</kw>
+<kw name="Wait Until Location Contains" owner="SeleniumLibrary">
+<arg>reports</arg>
+<arg>10s</arg>
+<doc>Waits until the current URL contains ``expected``.</doc>
+<status status="PASS" start="2026-03-04T14:51:53.629124" elapsed="1.010960"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:51:55.884525" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="delete_report_page.png"&gt;&lt;img src="delete_report_page.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>delete_report_page.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T14:51:54.640084" elapsed="1.244441"/>
+</kw>
+<status status="PASS" start="2026-03-04T14:51:51.209656" elapsed="4.674869"/>
+</kw>
+<kw name="Delete First Report">
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=(//button[@title="ลบ"])[1]</arg>
+<arg>15s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-04T14:51:55.887529" elapsed="2.045049"/>
+</kw>
+<kw name="Scroll Element Into View" owner="SeleniumLibrary">
+<arg>xpath=(//button[@title="ลบ"])[1]</arg>
+<doc>Scrolls the element identified by ``locator`` into view.</doc>
+<status status="PASS" start="2026-03-04T14:51:57.932578" elapsed="2.305911"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:52:01.495365" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="delete_before_click_trash.png"&gt;&lt;img src="delete_before_click_trash.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>delete_before_click_trash.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T14:52:00.238997" elapsed="1.256368"/>
+</kw>
+<kw name="Execute Javascript" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:52:01.496364" level="INFO">Executing JavaScript:
+document.evaluate("(//button[@title='ลบ'])[1]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
+Without any arguments.</msg>
+<arg>document.evaluate("(//button[@title='ลบ'])[1]", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();</arg>
+<doc>Executes the given JavaScript code with possible arguments.</doc>
+<status status="PASS" start="2026-03-04T14:52:01.495365" elapsed="1.029170"/>
+</kw>
+<kw name="Wait Until Element Is Visible" owner="SeleniumLibrary">
+<arg>xpath=//button[contains(@class,"bg-red-600") and normalize-space()="ลบถาวร"]</arg>
+<arg>10s</arg>
+<doc>Waits until the element ``locator`` is visible.</doc>
+<status status="PASS" start="2026-03-04T14:52:02.525053" elapsed="2.041133"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:52:05.817029" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="delete_modal_visible.png"&gt;&lt;img src="delete_modal_visible.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>delete_modal_visible.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T14:52:04.566186" elapsed="1.251843"/>
+</kw>
+<kw name="Scroll Element Into View" owner="SeleniumLibrary">
+<arg>xpath=//button[contains(@class,"bg-red-600") and normalize-space()="ลบถาวร"]</arg>
+<doc>Scrolls the element identified by ``locator`` into view.</doc>
+<status status="PASS" start="2026-03-04T14:52:05.818029" elapsed="2.291780"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-03-04T14:52:09.114278" level="INFO">Slept 1 second.</msg>
+<arg>1s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-03-04T14:52:08.109809" elapsed="1.004469"/>
+</kw>
+<kw name="Execute Javascript" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:52:09.116278" level="INFO">Executing JavaScript:
+document.evaluate("//button[contains(@class,'bg-red-600') and normalize-space()='ลบถาวร']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();
+Without any arguments.</msg>
+<arg>document.evaluate("//button[contains(@class,'bg-red-600') and normalize-space()='ลบถาวร']", document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.click();</arg>
+<doc>Executes the given JavaScript code with possible arguments.</doc>
+<status status="PASS" start="2026-03-04T14:52:09.114278" elapsed="1.022369"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:52:11.372684" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="delete_confirm_clicked.png"&gt;&lt;img src="delete_confirm_clicked.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>delete_confirm_clicked.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T14:52:10.137160" elapsed="1.235524"/>
+</kw>
+<kw name="Sleep" owner="BuiltIn">
+<msg time="2026-03-04T14:52:13.374225" level="INFO">Slept 2 seconds.</msg>
+<arg>2s</arg>
+<doc>Pauses the test executed for the given time.</doc>
+<status status="PASS" start="2026-03-04T14:52:11.373688" elapsed="2.000537"/>
+</kw>
+<status status="PASS" start="2026-03-04T14:51:55.886548" elapsed="17.487677"/>
+</kw>
+<kw name="Verify Delete Success Message">
+<kw name="Wait Until Page Contains" owner="SeleniumLibrary">
+<arg>ลบรายงานเรียบร้อย</arg>
+<arg>10s</arg>
+<doc>Waits until ``text`` appears on the current page.</doc>
+<status status="PASS" start="2026-03-04T14:52:13.376238" elapsed="1.038519"/>
+</kw>
+<kw name="Capture Page Screenshot" owner="SeleniumLibrary">
+<msg time="2026-03-04T14:52:15.675843" level="INFO" html="true">&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td colspan="3"&gt;&lt;a href="delete_success.png"&gt;&lt;img src="delete_success.png" width="800px"&gt;&lt;/a&gt;</msg>
+<arg>delete_success.png</arg>
+<doc>Takes a screenshot of the current page and embeds it into a log file.</doc>
+<status status="PASS" start="2026-03-04T14:52:14.414757" elapsed="1.261086"/>
+</kw>
+<status status="PASS" start="2026-03-04T14:52:13.375291" elapsed="2.301552"/>
+</kw>
+<status status="PASS" start="2026-03-04T14:51:35.498440" elapsed="40.178647"/>
+</test>
+<kw name="Close Browser" owner="SeleniumLibrary" type="TEARDOWN">
+<doc>Closes the current browser.</doc>
+<status status="PASS" start="2026-03-04T14:52:15.679103" elapsed="3.233547"/>
+</kw>
+<status status="PASS" start="2026-03-04T14:51:31.469686" elapsed="47.443959"/>
+</suite>
+<statistics>
+<total>
+<stat pass="1" fail="0" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat name="Tc11" id="s1" pass="1" fail="0" skip="0">Tc11</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
