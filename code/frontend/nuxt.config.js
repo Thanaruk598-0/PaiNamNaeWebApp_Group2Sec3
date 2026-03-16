@@ -5,8 +5,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
     public: {
-      // apiBase: "http://localhost:3005/api/",
-      apiBase: "https://painamnaewebappgroup2sec3-production-85a8.up.railway.app/api/",
+      apiBase: "http://localhost:3005/api/",
       googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
     },
   },

@@ -34,6 +34,24 @@ enum BookingStatus {
   CANCELLED
 }
 
+enum PaymentStatus {
+  UNPAID
+  PENDING_CHECK
+  PAID
+  FAILED
+}
+
+enum PaymentChannel {
+  PROMPTPAY
+  BANK_TRANSFER
+  CASH
+}
+
+enum PaymentDocumentType {
+  RECEIPT_VOUCHER
+  SHORT_TAX_INVOICE
+}
+
 enum CancelReason {
   CHANGE_OF_PLAN // เปลี่ยนแผน/มีธุระกะทันหัน
   FOUND_ALTERNATIVE // พบวิธีเดินทางอื่นแล้ว
@@ -111,6 +129,10 @@ model User {
   notification            Notification[]
   createdRoutes           Route[]             @relation("DriverRoutes")
   bookings                Booking[]           @relation("PassengerBookings")
+  promptPayId             String?
+  bankAccounts            BankAccount[]
+  passengerPayments       Payment[]           @relation("PassengerPayments")
+  driverPayments          Payment[]           @relation("DriverPayments")
   reports                 Report[]
 
   @@index([role])
@@ -235,6 +257,60 @@ model Booking {
   dropoffLocation Json          @db.Json
   createdAt       DateTime      @default(now())
   reports         Report[]
+  payment         Payment?      @relation("BookingPayment")
+}
+
+model BankAccount {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bankCode       String
+  customBankName String?
+  accountNumber  String
+  accountName    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Payment {
+  id                String         @id @default(cuid())
+  bookingId         String         @unique
+  booking           Booking        @relation("BookingPayment", fields: [bookingId], references: [id], onDelete: Cascade)
+  passengerId       String
+  passenger         User           @relation("PassengerPayments", fields: [passengerId], references: [id], onDelete: Cascade)
+  driverId          String
+  driver            User           @relation("DriverPayments", fields: [driverId], references: [id], onDelete: Cascade)
+  amount            Float
+  status            PaymentStatus  @default(UNPAID)
+  channel           PaymentChannel?
+  slipImageUrl      String?
+  declaredAt        DateTime?
+  verifiedAt        DateTime?
+  rejectReason      String?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  documents         PaymentDocument[]
+
+  @@index([passengerId])
+  @@index([driverId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PaymentDocument {
+  id             String              @id @default(cuid())
+  paymentId      String
+  payment        Payment             @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  type           PaymentDocumentType
+  documentNumber String
+  issuedAt       DateTime            @default(now())
+  filePath       String
+  metadata       Json?               @db.Json
+  createdAt      DateTime            @default(now())
+
+  @@index([paymentId, type])
 }
 
 model Report {

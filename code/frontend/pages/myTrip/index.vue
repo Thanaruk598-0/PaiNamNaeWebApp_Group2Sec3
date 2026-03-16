@@ -141,15 +141,53 @@
                                     </div>
                                 </div>
 
-                                <div class="flex justify-end space-x-3" :class="{ 'mt-4': selectedTripId !== trip.id }">
+                                <div class="flex flex-wrap justify-end gap-3"
+                                    :class="{ 'mt-4': selectedTripId !== trip.id }">
+                                    <!-- แสดงสถานะการชำระเงิน -->
+                                    <div class="flex flex-wrap justify-end gap-2 mr-auto">
+                                        <span v-if="trip.paymentStatus === 'paid'"
+                                            class="inline-flex items-center px-3 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
+                                            ชำระเงินแล้ว
+                                        </span>
+                                        <span v-else-if="trip.paymentStatus === 'pending_check'"
+                                            class="inline-flex items-center px-3 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">
+                                            รอตรวจสอบการชำระเงิน
+                                        </span>
+                                        <span v-else-if="trip.paymentStatus === 'failed'"
+                                            class="inline-flex items-center px-3 py-1 text-xs font-medium text-red-800 bg-red-100 rounded-full">
+                                            การชำระเงินไม่สำเร็จ
+                                        </span>
+                                        <span v-else-if="trip.status === 'confirmed'"
+                                            class="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">
+                                            รอชำระเงิน
+                                        </span>
+
+                                        <!-- ปุ่มดาวน์โหลดเอกสาร -->
+                                        <template v-if="trip.paymentStatus === 'paid'">
+                                            <button @click.stop="downloadReceiptVoucher(trip)"
+                                                class="px-3 py-1 text-xs font-medium text-indigo-700 bg-indigo-100 rounded-md hover:bg-indigo-200">
+                                                ใบสำคัญรับเงิน
+                                            </button>
+                                            <button @click.stop="downloadShortTaxInvoice(trip)"
+                                                class="px-3 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-md hover:bg-purple-200">
+                                                ใบกำกับภาษีแบบย่อ
+                                            </button>
+                                        </template>
+                                    </div>
+
                                     <!-- PENDING: ยกเลิกได้ -->
                                     <button v-if="trip.status === 'pending'" @click.stop="openCancelModal(trip)"
                                         class="px-4 py-2 text-sm text-red-600 transition duration-200 border border-red-300 rounded-md hover:bg-red-50">
                                         ยกเลิกการจอง
                                     </button>
 
-                                    <!-- CONFIRMED: เพิ่มปุ่มยกเลิก + คงปุ่มแชท -->
+                                    <!-- CONFIRMED: ชำระเงิน + ยกเลิก + แชท -->
                                     <template v-else-if="trip.status === 'confirmed'">
+                                        <button v-if="!trip.paymentStatus || trip.paymentStatus === 'unpaid'"
+                                            @click.stop="openPaymentModal(trip)"
+                                            class="px-4 py-2 text-sm text-white transition duration-200 bg-emerald-600 rounded-md hover:bg-emerald-700">
+                                            ชำระเงิน
+                                        </button>
                                         <button @click.stop="openCancelModal(trip)"
                                             class="px-4 py-2 text-sm text-red-600 transition duration-200 border border-red-300 rounded-md hover:bg-red-50">
                                             ยกเลิกการจอง
@@ -219,6 +257,50 @@
         <ConfirmModal :show="isModalVisible" :title="modalContent.title" :message="modalContent.message"
             :confirmText="modalContent.confirmText" :variant="modalContent.variant" @confirm="handleConfirmAction"
             @cancel="closeConfirmModal" />
+
+        <!-- Modal: ชำระเงิน -->
+        <div v-if="isPaymentModalVisible" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+            @click.self="closePaymentModal">
+            <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
+                <h3 class="text-lg font-semibold text-gray-900">ชำระเงินค่าบริการ</h3>
+                <p class="mt-1 text-sm text-gray-600">
+                    เส้นทาง: {{ activePaymentTrip?.origin }} → {{ activePaymentTrip?.destination }}
+                </p>
+                <p class="mt-1 text-sm font-medium text-gray-900">
+                    ยอดชำระ: {{ activePaymentTrip?.price }} บาท ({{ activePaymentTrip?.seats }} ที่นั่ง)
+                </p>
+
+                <div class="mt-4 space-y-3">
+                    <div>
+                        <label class="block mb-1 text-sm text-gray-700">ช่องทางการชำระเงิน</label>
+                        <select v-model="paymentMethod"
+                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="BANK_TRANSFER">โอนเงิน / อัปโหลดสลิป</option>
+                            <option value="CASH">ชำระเงินสดกับคนขับ</option>
+                        </select>
+                    </div>
+
+                    <div v-if="paymentMethod === 'BANK_TRANSFER'" class="space-y-2">
+                        <label class="block mb-1 text-sm text-gray-700">อัปโหลดสลิปการโอนเงิน</label>
+                        <input type="file" accept="image/*" @change="onSlipSelected"
+                            class="block w-full text-sm text-gray-700" />
+                        <p class="text-xs text-gray-500">รองรับไฟล์รูปภาพ ขนาดไม่เกิน 5MB</p>
+                        <p v-if="paymentSlipError" class="mt-1 text-xs text-red-600">{{ paymentSlipError }}</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 mt-6">
+                    <button @click="closePaymentModal"
+                        class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+                        ปิด
+                    </button>
+                    <button @click="submitPayment" :disabled="isSubmittingPayment || !canSubmitPayment"
+                        class="px-4 py-2 text-sm text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50">
+                        {{ isSubmittingPayment ? 'กำลังดำเนินการ...' : 'ยืนยันการชำระเงิน' }}
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -257,6 +339,21 @@ const mapReady = ref(false)
 let stopMarkers = []
 
 const GMAPS_CB = '__gmapsReady__'
+
+// --- Payment state ---
+const isPaymentModalVisible = ref(false)
+const activePaymentTrip = ref(null)
+const paymentMethod = ref('BANK_TRANSFER')
+const paymentSlipFile = ref(null)
+const isSubmittingPayment = ref(false)
+const paymentSlipError = ref('')
+
+const canSubmitPayment = computed(() => {
+    if (paymentMethod.value === 'BANK_TRANSFER') {
+        return !!paymentSlipFile.value
+    }
+    return true
+})
 
 const tabs = [
     { status: 'pending', label: 'รอดำเนินการ' },
@@ -360,9 +457,13 @@ async function fetchMyTrips() {
                 )
                 .filter(Boolean)
 
+            const paymentStatus = b.payment?.status ? String(b.payment.status).toLowerCase() : 'unpaid'
+
             return {
                 id: b.id,
                 status: String(b.status || '').toLowerCase(),
+                paymentStatus,
+                paymentId: b.payment?.id || null,
                 origin: start?.name || `(${Number(start.lat).toFixed(2)}, ${Number(start.lng).toFixed(2)})`,
                 destination: end?.name || `(${Number(end.lat).toFixed(2)}, ${Number(end.lng).toFixed(2)})`,
                 originAddress: start?.address ? cleanAddr(start.address) : null,
@@ -501,6 +602,120 @@ const toggleTripDetails = (tripId) => {
         selectedTripId.value = null
     } else {
         selectedTripId.value = tripId
+    }
+}
+
+const openPaymentModal = (trip) => {
+    activePaymentTrip.value = trip
+    paymentMethod.value = 'BANK_TRANSFER'
+    paymentSlipFile.value = null
+    paymentSlipError.value = ''
+    isPaymentModalVisible.value = true
+}
+
+const closePaymentModal = () => {
+    isPaymentModalVisible.value = false
+    activePaymentTrip.value = null
+    paymentSlipFile.value = null
+    paymentSlipError.value = ''
+}
+
+const onSlipSelected = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) {
+        paymentSlipFile.value = null
+        return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        paymentSlipError.value = 'ไฟล์มีขนาดเกิน 5MB'
+        paymentSlipFile.value = null
+        return
+    }
+    paymentSlipError.value = ''
+    paymentSlipFile.value = file
+}
+
+const submitPayment = async () => {
+    if (!activePaymentTrip.value) return
+    if (paymentMethod.value === 'BANK_TRANSFER' && !paymentSlipFile.value) {
+        paymentSlipError.value = 'กรุณาอัปโหลดสลิปการชำระเงิน'
+        return
+    }
+
+    isSubmittingPayment.value = true
+    try {
+        const bookingId = activePaymentTrip.value.id
+
+        if (paymentMethod.value === 'CASH') {
+            await $api(`/payments/booking/${bookingId}/cash`, {
+                method: 'POST',
+            })
+        } else {
+            const formData = new FormData()
+            formData.append('method', 'BANK_TRANSFER')
+            formData.append('slip', paymentSlipFile.value)
+
+            await $fetch(`${useRuntimeConfig().public.apiBase}payments/booking/${bookingId}/slip`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    Authorization: `Bearer ${useCookie('token').value || ''}`,
+                },
+            })
+        }
+
+        toast.success('ส่งข้อมูลการชำระเงินเรียบร้อยแล้ว')
+        closePaymentModal()
+        await fetchMyTrips()
+    } catch (error) {
+        console.error('submitPayment error', error)
+        toast.error(error?.statusMessage || 'ไม่สามารถส่งข้อมูลการชำระเงินได้')
+    } finally {
+        isSubmittingPayment.value = false
+    }
+}
+
+const downloadReceiptVoucher = async (trip) => {
+    if (!trip.paymentId) {
+        toast.error('ยังไม่มีข้อมูลการชำระเงินสำหรับรายการนี้')
+        return
+    }
+    await openPdfInNewTab(`/payments/${trip.paymentId}/receipt-voucher`)
+}
+
+const downloadShortTaxInvoice = async (trip) => {
+    if (!trip.paymentId) {
+        toast.error('ยังไม่มีข้อมูลการชำระเงินสำหรับรายการนี้')
+        return
+    }
+    await openPdfInNewTab(`/payments/${trip.paymentId}/short-tax-invoice`)
+}
+
+async function openPdfInNewTab(path) {
+    try {
+        const base = useRuntimeConfig().public.apiBase
+        const token = useCookie('token').value
+        const url = `${base.replace(/\/$/, '')}${path}`
+
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: token
+                ? {
+                    Authorization: `Bearer ${token}`,
+                }
+                : {},
+        })
+
+        if (!response.ok) {
+            throw new Error('ดาวน์โหลดเอกสารไม่สำเร็จ')
+        }
+
+        const blob = await response.blob()
+        const blobUrl = window.URL.createObjectURL(blob)
+        window.open(blobUrl, '_blank')
+    } catch (error) {
+        console.error('openPdfInNewTab error', error)
+        toast.error('ไม่สามารถเปิดเอกสารได้')
     }
 }
 

@@ -306,7 +306,12 @@ const getMyBookings = async (passengerId) => {
             }
           }
         }
-      }
+      },
+      payment: {
+        include: {
+          documents: true,
+        },
+      },
 
     },
     orderBy: { createdAt: 'desc' },
