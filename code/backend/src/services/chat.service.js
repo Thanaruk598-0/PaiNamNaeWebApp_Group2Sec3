@@ -77,9 +77,51 @@ const getUnreadCount = async (reportId, userId) => {
     return count;
 };
 
+/**
+ * Initialize or get existing chat for a booking
+ */
+const initBookingChat = async (bookingId, userId) => {
+    const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: { route: true }
+    });
+
+    if (!booking) throw new ApiError(404, 'Booking not found');
+
+    if (booking.passengerId !== userId && booking.route.driverId !== userId) {
+        throw new ApiError(403, 'You are not authorized to chat in this booking');
+    }
+
+    let report = await prisma.report.findFirst({
+        where: {
+            bookingId,
+            incidentType: 'OTHER',
+            title: 'Booking Chat'
+        }
+    });
+
+    if (!report) {
+        report = await prisma.report.create({
+            data: {
+                userId: booking.passengerId,
+                bookingId,
+                incidentType: 'OTHER',
+                priority: 'LOW',
+                title: 'Booking Chat',
+                description: 'Auto-generated chat room for booking',
+                location: {},
+                status: 'IN_PROGRESS'
+            }
+        });
+    }
+
+    return { reportId: report.id };
+};
+
 module.exports = {
     getMessages,
     createMessage,
     markRead,
     getUnreadCount,
+    initBookingChat,
 };

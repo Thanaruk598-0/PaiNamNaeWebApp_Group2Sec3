@@ -74,10 +74,20 @@ const getUnreadCount = asyncHandler(async (req, res) => {
     res.json({ status: 'success', data: { unreadCount: count } });
 });
 
+/** POST /api/chat/booking/:bookingId/init */
+const initBookingChat = asyncHandler(async (req, res) => {
+    const { bookingId } = req.params;
+    const userId = req.user.sub;
+
+    const result = await chatService.initBookingChat(bookingId, userId);
+    res.status(200).json({ status: 'success', data: result });
+});
+
 module.exports = {
     getMessages,
     sendMessage,
     uploadFile,
     markRead,
     getUnreadCount,
+    initBookingChat,
 };

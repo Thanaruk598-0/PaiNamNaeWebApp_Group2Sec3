@@ -54,6 +54,13 @@ const getPaymentDocuments = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, message: 'Payment documents retrieved', data });
 });
 
+const regenerateDocuments = asyncHandler(async (req, res) => {
+  const userId = req.user.sub;
+  const paymentId = req.params.id;
+  const data = await documentService.regenerateDocuments(paymentId, userId);
+  res.status(200).json({ success: true, message: 'Documents regenerated successfully', data });
+});
+
 const downloadReceiptVoucher = asyncHandler(async (req, res) => {
   const userId = req.user.sub;
   const paymentId = req.params.id;
@@ -74,6 +81,7 @@ module.exports = {
   rejectPayment,
   listDriverPaidPassengers,
   getPaymentDocuments,
+  regenerateDocuments,
   downloadReceiptVoucher,
   downloadShortTaxInvoice,
 };

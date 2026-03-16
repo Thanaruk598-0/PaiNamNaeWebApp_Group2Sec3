@@ -10,6 +10,9 @@ const router = express.Router();
 // All chat routes require authentication
 router.use(protect);
 
+// Init or get booking chat
+router.post('/booking/:bookingId/init', chatController.initBookingChat);
+
 // Get messages for a report
 router.get('/:reportId/messages', chatController.getMessages);
 

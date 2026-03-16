@@ -141,36 +141,39 @@
                                     </div>
                                 </div>
 
-                                <div class="flex flex-wrap justify-end gap-3"
+                                <div class="flex flex-wrap justify-end items-end gap-3"
                                     :class="{ 'mt-4': selectedTripId !== trip.id }">
                                     <!-- แสดงสถานะการชำระเงิน -->
-                                    <div class="flex flex-wrap justify-end gap-2 mr-auto">
+                                    <div class="flex flex-wrap items-center gap-2 mr-auto">
+                                        <!-- สถานะการชำระเงิน PENDING_CHECK / PAID / FAILED -->
                                         <span v-if="trip.paymentStatus === 'paid'"
-                                            class="inline-flex items-center px-3 py-1 text-xs font-medium text-green-800 bg-green-100 rounded-full">
-                                            ชำระเงินแล้ว
+                                            class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-green-800 bg-green-100 rounded-full shadow-sm">
+                                            <i class="fas fa-circle-check mr-1.5 text-green-600"></i>ชำระเงินแล้ว
                                         </span>
                                         <span v-else-if="trip.paymentStatus === 'pending_check'"
-                                            class="inline-flex items-center px-3 py-1 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">
-                                            รอตรวจสอบการชำระเงิน
+                                            class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-yellow-800 bg-yellow-100 rounded-full shadow-sm">
+                                            <i class="fas fa-clock mr-1.5"></i>รอตรวจสอบ
                                         </span>
                                         <span v-else-if="trip.paymentStatus === 'failed'"
-                                            class="inline-flex items-center px-3 py-1 text-xs font-medium text-red-800 bg-red-100 rounded-full">
-                                            การชำระเงินไม่สำเร็จ
+                                            class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-red-800 bg-red-100 rounded-full shadow-sm">
+                                            <i class="fas fa-circle-xmark mr-1.5 text-red-600"></i>ชำระเงินไม่สำเร็จ
                                         </span>
                                         <span v-else-if="trip.status === 'confirmed'"
-                                            class="inline-flex items-center px-3 py-1 text-xs font-medium text-gray-700 bg-gray-100 rounded-full">
+                                            class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-full shadow-sm">
                                             รอชำระเงิน
                                         </span>
 
-                                        <!-- ปุ่มดาวน์โหลดเอกสาร -->
-                                        <template v-if="trip.paymentStatus === 'paid'">
-                                            <button @click.stop="downloadReceiptVoucher(trip)"
-                                                class="px-3 py-1 text-xs font-medium text-indigo-700 bg-indigo-100 rounded-md hover:bg-indigo-200">
-                                                ใบสำคัญรับเงิน
+                                        <!-- ปุ่มดาวน์โหลดเอกสาร และดูสลิป -->
+                                        <template v-if="trip.paymentStatus === 'paid' || trip.paymentStatus === 'pending_check'">
+                                            <button v-if="trip.slipUrl" @click.stop="slipLightboxUrl = trip.slipUrl"
+                                                class="px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 flex items-center justify-center transition">
+                                                <i class="fas fa-image mr-1.5"></i> ดูสลิป
                                             </button>
-                                            <button @click.stop="downloadShortTaxInvoice(trip)"
-                                                class="px-3 py-1 text-xs font-medium text-purple-700 bg-purple-100 rounded-md hover:bg-purple-200">
-                                                ใบกำกับภาษีแบบย่อ
+                                        </template>
+                                        <template v-if="trip.paymentStatus === 'paid'">
+                                            <button @click.stop="openDocumentModal(trip)"
+                                                class="px-3 py-1.5 text-sm font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md hover:bg-indigo-100 flex items-center justify-center transition">
+                                                <i class="fas fa-file-invoice mr-1.5"></i> เอกสาร
                                             </button>
                                         </template>
                                     </div>
@@ -192,7 +195,7 @@
                                             class="px-4 py-2 text-sm text-red-600 transition duration-200 border border-red-300 rounded-md hover:bg-red-50">
                                             ยกเลิกการจอง
                                         </button>
-                                        <button
+                                        <button @click.stop="bookingChatModal.openChat(trip.id)"
                                             class="px-4 py-2 text-sm text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700">
                                             แชทกับผู้ขับ
                                         </button>
@@ -301,6 +304,28 @@
                 </div>
             </div>
         </div>
+
+        <BookingChatModal ref="bookingChatModal" />
+
+        <!-- Payment Document Modal -->
+        <PaymentDocumentModal v-model="isDocumentModalVisible" :trip="documentModalTrip" />
+
+        <!-- Lightbox for Slip -->
+        <div
+            v-if="slipLightboxUrl"
+            class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            @click.self="slipLightboxUrl = null"
+        >
+            <div class="relative max-w-4xl max-h-[90vh]">
+                <button
+                @click="slipLightboxUrl = null"
+                class="absolute -top-4 -right-4 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-red-500 transition z-10"
+                >
+                <i class="fas fa-xmark"></i>
+                </button>
+                <img :src="slipLightboxUrl" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl object-contain" />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -310,6 +335,8 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
 import ConfirmModal from '~/components/ConfirmModal.vue'
+import BookingChatModal from '~/components/BookingChatModal.vue'
+import PaymentDocumentModal from '~/components/PaymentDocumentModal.vue'
 import { useToast } from '~/composables/useToast'
 
 // Setup dayjs for Thai locale
@@ -328,6 +355,18 @@ let map = null
 let currentPolyline = null
 let currentMarkers = []
 const allTrips = ref([])
+
+const bookingChatModal = ref(null)
+const slipLightboxUrl = ref(null)
+
+// --- Document Modal state ---
+const isDocumentModalVisible = ref(false)
+const documentModalTrip = ref(null)
+
+const openDocumentModal = (trip) => {
+    documentModalTrip.value = trip
+    isDocumentModalVisible.value = true
+}
 
 let gmap = null // Google Map instance
 let activePolyline = null
@@ -464,6 +503,7 @@ async function fetchMyTrips() {
                 status: String(b.status || '').toLowerCase(),
                 paymentStatus,
                 paymentId: b.payment?.id || null,
+                slipUrl: b.payment?.slipImageUrl || null,
                 origin: start?.name || `(${Number(start.lat).toFixed(2)}, ${Number(start.lng).toFixed(2)})`,
                 destination: end?.name || `(${Number(end.lat).toFixed(2)}, ${Number(end.lng).toFixed(2)})`,
                 originAddress: start?.address ? cleanAddr(start.address) : null,

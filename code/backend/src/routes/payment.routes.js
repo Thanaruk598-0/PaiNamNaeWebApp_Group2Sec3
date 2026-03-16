@@ -64,6 +64,13 @@ router.get(
   paymentController.getPaymentDocuments
 );
 
+// POST /payments/:id/regenerate - force regenerate all documents
+router.post(
+  '/:id/regenerate',
+  protect,
+  paymentController.regenerateDocuments
+);
+
 // GET /payments/:id/receipt-voucher - stream receipt voucher PDF
 router.get(
   '/:id/receipt-voucher',

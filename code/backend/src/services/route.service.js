@@ -265,7 +265,6 @@ const getMyRoutes = async (driverId) => {
       driverId
     },
     include: {
-
       bookings: {
         include: {
           passenger: {
@@ -277,7 +276,8 @@ const getMyRoutes = async (driverId) => {
               isVerified: true,
               email: true
             }
-          }
+          },
+          payment: true
         }
       },
       ...baseInclude

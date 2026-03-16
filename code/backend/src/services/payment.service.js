@@ -1,6 +1,7 @@
 const prisma = require('../utils/prisma');
 const ApiError = require('../utils/ApiError');
 const { PaymentStatus, PaymentChannel } = require('@prisma/client');
+const documentService = require('./document.service');
 const { uploadToCloudinary } = require('../utils/cloudinary');
 
 const getBookingWithRelations = async (bookingId) => {
@@ -119,15 +120,16 @@ const declareCashPayment = async (bookingId, passengerId) => {
   const booking = await getBookingWithRelations(bookingId);
   ensureCanDeclarePayment(booking, passengerId);
 
-  return prisma.$transaction(async (tx) => {
-    const payment = await createOrUpdatePaymentBase(tx, {
+  const payment = await prisma.$transaction(async (tx) => {
+    const base = await createOrUpdatePaymentBase(tx, {
       booking,
       passengerId,
       channel: PaymentChannel.CASH,
     });
 
+    // ให้คนขับยืนยัน (รอตรวจสอบ)
     const updated = await tx.payment.update({
-      where: { id: payment.id },
+      where: { id: base.id },
       data: {
         slipImageUrl: null,
       },
@@ -140,6 +142,8 @@ const declareCashPayment = async (bookingId, passengerId) => {
 
     return updated;
   });
+
+  return payment;
 };
 
 const verifyPayment = async (bookingId, driverId, { method }) => {

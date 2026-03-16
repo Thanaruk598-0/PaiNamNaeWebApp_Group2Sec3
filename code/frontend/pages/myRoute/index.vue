@@ -274,9 +274,11 @@
                                             </span>
                                         </div>
                                     </div>
-                                    <div class="text-right">
+                                        <div class="text-right flex flex-col items-end gap-1">
                                         <div class="text-lg font-bold text-blue-600">{{ trip.price }} บาท</div>
                                         <div class="text-sm text-gray-600">จำนวน {{ trip.seats }} ที่นั่ง</div>
+                                        
+
                                     </div>
                                 </div>
 
@@ -336,7 +338,47 @@
                                     </div>
                                 </div>
 
-                                <div class="flex justify-end space-x-3" :class="{ 'mt-4': selectedTripId !== trip.id }">
+                                <div class="flex flex-wrap justify-end items-end gap-3" :class="{ 'mt-4': selectedTripId !== trip.id }">
+                                    <div class="flex flex-wrap items-center gap-2 mr-auto">
+                                        <!-- สถานะการชำระเงิน PENDING_CHECK / PAID / FAILED -->
+                                        <span v-if="trip.paymentStatus === 'paid'"
+                                            class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-green-800 bg-green-100 rounded-full shadow-sm">
+                                            <i class="fas fa-circle-check mr-1.5 text-green-600"></i>ชำระแล้ว
+                                        </span>
+                                        <span v-else-if="trip.paymentStatus === 'pending_check'"
+                                            class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-yellow-800 bg-yellow-100 rounded-full shadow-sm">
+                                            <i class="fas fa-clock mr-1.5"></i>รอตรวจสอบ
+                                        </span>
+                                        <span v-else-if="trip.paymentStatus === 'failed'"
+                                            class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-red-800 bg-red-100 rounded-full shadow-sm">
+                                            <i class="fas fa-circle-xmark mr-1.5 text-red-600"></i>การชำระเงินไม่สำเร็จ
+                                        </span>
+                                        <span v-else-if="trip.status === 'confirmed'"
+                                            class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-full shadow-sm">
+                                            รอชำระเงิน
+                                        </span>
+
+                                        <template v-if="trip.paymentStatus === 'paid' || trip.paymentStatus === 'pending_check'">
+                                            <button v-if="trip.slipUrl" @click.stop="slipLightboxUrl = trip.slipUrl"
+                                                class="px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 flex items-center justify-center transition">
+                                                <i class="fas fa-image mr-1.5"></i> ดูสลิป
+                                            </button>
+                                        </template>
+                                        
+                                        <template v-if="trip.paymentStatus === 'pending_check'">
+                                            <button @click.stop="openConfirmModal(trip, 'verify_payment')"
+                                                class="px-3 py-1.5 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 flex justify-center items-center shadow-sm transition">
+                                                <i class="fas fa-check-circle mr-1.5"></i> ยืนยันรับเงิน
+                                            </button>
+                                        </template>
+
+                                        <template v-if="trip.paymentStatus === 'paid' && trip.paymentId">
+                                            <button @click.stop="openDriverDocModal(trip)"
+                                                class="px-3 py-1.5 text-sm font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md hover:bg-indigo-100 flex items-center justify-center transition">
+                                                <i class="fas fa-file-invoice mr-1.5"></i> เอกสาร
+                                            </button>
+                                        </template>
+                                    </div>
                                     <template v-if="trip.status === 'pending'">
                                         <button @click.stop="openConfirmModal(trip, 'confirm')"
                                             class="px-4 py-2 text-sm text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700">
@@ -348,7 +390,7 @@
                                         </button>
                                     </template>
 
-                                    <button v-else-if="trip.status === 'confirmed'"
+                                    <button v-else-if="trip.status === 'confirmed'" @click.stop="bookingChatModal.openChat(trip.id)"
                                         class="px-4 py-2 text-sm text-white transition duration-200 bg-blue-600 rounded-md hover:bg-blue-700">
                                         แชทกับผู้โดยสาร
                                     </button>
@@ -382,6 +424,28 @@
         <ConfirmModal :show="isModalVisible" :title="modalContent.title" :message="modalContent.message"
             :confirmText="modalContent.confirmText" :variant="modalContent.variant" @confirm="handleConfirmAction"
             @cancel="closeConfirmModal" />
+
+        <BookingChatModal ref="bookingChatModal" />
+
+        <!-- Payment Document Modal (Driver) -->
+        <PaymentDocumentModal v-model="isDriverDocModalVisible" :trip="driverDocModalTrip" />
+
+        <!-- Lightbox for Slip -->
+        <div
+            v-if="slipLightboxUrl"
+            class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            @click.self="slipLightboxUrl = null"
+        >
+            <div class="relative max-w-4xl max-h-[90vh]">
+                <button
+                @click="slipLightboxUrl = null"
+                class="absolute -top-4 -right-4 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-gray-600 hover:text-red-500 transition z-10"
+                >
+                <i class="fas fa-xmark"></i>
+                </button>
+                <img :src="slipLightboxUrl" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl object-contain" />
+            </div>
+        </div>
     </div>
 </template>
 
@@ -391,6 +455,8 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import buddhistEra from 'dayjs/plugin/buddhistEra'
 import ConfirmModal from '~/components/ConfirmModal.vue'
+import BookingChatModal from '~/components/BookingChatModal.vue'
+import PaymentDocumentModal from '~/components/PaymentDocumentModal.vue'
 import { useToast } from '~/composables/useToast'
 
 dayjs.locale('th')
@@ -406,6 +472,18 @@ const isLoading = ref(false)
 const mapContainer = ref(null)
 const allTrips = ref([])
 const myRoutes = ref([])
+
+const bookingChatModal = ref(null)
+const slipLightboxUrl = ref(null)
+
+// --- Driver Document Modal state ---
+const isDriverDocModalVisible = ref(false)
+const driverDocModalTrip = ref(null)
+
+const openDriverDocModal = (trip) => {
+    driverDocModalTrip.value = trip
+    isDriverDocModalVisible.value = true
+}
 
 // ---------- Google Maps states ----------
 let gmap = null
@@ -542,6 +620,10 @@ async function fetchMyRoutes() {
                         rating: 4.5,
                         reviews: Math.floor(Math.random() * 50) + 5,
                     },
+                    paymentId: b.payment?.id || null,
+                    paymentStatus: String(b.payment?.status || '').toLowerCase(),
+                    paymentChannel: String(b.payment?.channel || ''),
+                    slipUrl: b.payment?.slipImageUrl || null,
                     coords,
                     polyline: r.routePolyline || null,
                     stops,
@@ -782,6 +864,14 @@ const openConfirmModal = (trip, action) => {
             action: 'delete',
             variant: 'danger',
         }
+    } else if (action === 'verify_payment') {
+        modalContent.value = {
+            title: 'ยืนยันการรับเงิน',
+            message: 'คุณได้ตรวจสอบสลิปโอนเงิน หรือ ได้รับเงินสดเรียบร้อยแล้วใช่หรือไม่? เมื่อยืนยันแล้วระบบจะเปลี่ยนสถานะและออกใบเสร็จให้ผู้โดยสาร',
+            confirmText: 'ยืนยันได้รับเงินแล้ว',
+            action: 'verify_payment',
+            variant: 'success',
+        }
     }
     isModalVisible.value = true
 }
@@ -805,6 +895,10 @@ const handleConfirmAction = async () => {
         } else if (action === 'delete') {
             await $api(`/bookings/${bookingId}`, { method: 'DELETE' })
             toast.success('ลบรายการสำเร็จ', 'ลบคำขอออกจากรายการแล้ว')
+        } else if (action === 'verify_payment') {
+            const channel = tripToAction.value.paymentChannel || 'BANK_TRANSFER'
+            await $api(`/payments/booking/${bookingId}/verify`, { method: 'POST', body: { method: channel } })
+            toast.success('สำเร็จ', 'ยืนยันการรับชำระเงินเรียบร้อยแล้ว')
         }
         closeConfirmModal()
         await fetchMyRoutes()
