@@ -1,6 +1,7 @@
 const express = require('express');
 const validate = require('../middlewares/validate');
 const { protect } = require('../middlewares/auth');
+const upload = require('../middlewares/upload.middleware');
 const paymentMethodController = require('../controllers/paymentMethod.controller');
 const {
   updatePromptPaySchema,
@@ -20,6 +21,14 @@ router.put(
   protect,
   validate({ body: updatePromptPaySchema }),
   paymentMethodController.updatePromptPay
+);
+
+// PUT /api/payment-methods/promptpay-qr - upload promptpay QR (image/pdf)
+router.put(
+  '/promptpay-qr',
+  protect,
+  upload.single('qr'),
+  paymentMethodController.updatePromptPayQr
 );
 
 // POST /api/payment-methods/bank-accounts - add bank account

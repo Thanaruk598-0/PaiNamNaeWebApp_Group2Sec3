@@ -34,8 +34,15 @@ const getPaymentByBooking = async (bookingId, userId) => {
     throw new ApiError(403, 'Forbidden');
   }
 
+  const driverName = `${booking.route?.driver?.firstName || ''} ${booking.route?.driver?.lastName || ''}`.trim()
+    || booking.route?.driver?.username
+    || booking.route?.driver?.email
+    || null;
+
   const driverPaymentMethods = {
+    ownerName: driverName,
     promptPayId: booking.route?.driver?.promptPayId || null,
+    promptPayQrUrl: booking.route?.driver?.promptPayQrUrl || null,
     bankAccounts: booking.route?.driver?.bankAccounts || [],
   };
 

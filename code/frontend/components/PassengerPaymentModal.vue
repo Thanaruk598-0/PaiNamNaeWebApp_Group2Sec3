@@ -6,12 +6,12 @@
         class="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
         @click.self="close"
       >
-        <div class="w-full max-w-[440px] bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div class="w-full max-w-[480px] bg-white rounded-3xl shadow-2xl overflow-hidden">
           <!-- Header -->
           <div class="px-6 py-5 border-b border-gray-100 flex items-start justify-between">
             <div>
-              <p class="text-xs font-medium text-gray-500">ชำระค่าโดยสาร</p>
-              <h3 class="text-lg font-bold text-gray-900">
+              <p class="text-sm font-medium text-gray-500">ชำระค่าโดยสาร</p>
+              <h3 class="text-xl font-bold text-gray-900">
                 {{ headerTitle }}
               </h3>
             </div>
@@ -30,20 +30,30 @@
           <!-- Body -->
           <div class="px-6 py-5">
             <!-- Summary card -->
-            <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-              <p class="text-xs text-slate-500">ผู้รับ: {{ receiverLabel }}</p>
-              <p class="mt-1 text-2xl font-extrabold text-blue-600">
-                {{ amountLabel }}
-                <span class="text-sm font-bold text-slate-500">บาท</span>
-              </p>
-              <p class="mt-1 text-xs text-slate-500">
-                {{ trip?.origin }} → {{ trip?.destination }}
-              </p>
+            <div class="p-5 bg-gradient-to-br from-slate-50 to-white rounded-2xl border border-slate-100">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-slate-500">ผู้รับเงิน</p>
+                  <p class="mt-0.5 text-base font-bold text-slate-800 truncate">{{ receiverLabel }}</p>
+                </div>
+                <div class="text-right shrink-0">
+                  <p class="text-sm font-semibold text-slate-500">ยอดชำระ</p>
+                  <p class="mt-0.5 text-2xl font-extrabold text-blue-600 leading-none">
+                    {{ amountLabel }}
+                    <span class="text-base font-bold text-slate-500">บาท</span>
+                  </p>
+                </div>
+              </div>
+              <div class="mt-3 flex items-center gap-2 text-sm text-slate-500">
+                <span class="inline-flex items-center px-2 py-1 rounded-full bg-white border border-slate-100">
+                  {{ trip?.origin }} → {{ trip?.destination }}
+                </span>
+              </div>
             </div>
 
             <!-- Step 1: choose method -->
             <div v-if="step === 1" class="mt-5">
-              <p class="text-sm font-semibold text-gray-800">เลือกช่องทางการชำระเงิน</p>
+              <p class="text-base font-semibold text-gray-800">เลือกวิธีชำระเงิน</p>
 
               <div class="mt-3 space-y-3">
                 <button
@@ -54,10 +64,10 @@
                 >
                   <div class="flex items-center justify-between">
                     <div>
-                      <p class="font-bold text-gray-900">โอนเงิน</p>
-                      <p class="text-xs text-gray-500">อัปโหลดสลิปยืนยันการโอน</p>
+                      <p class="text-lg font-bold text-gray-900">โอนเงิน</p>
+                      <p class="text-sm text-gray-600 leading-snug">สแกน/ดู QR หรือโอนเข้าบัญชี แล้วอัปโหลดสลิป</p>
                     </div>
-                    <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded-full">แนะนำ</span>
+                    <span class="text-sm font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full">แนะนำ</span>
                   </div>
                 </button>
 
@@ -69,32 +79,76 @@
                 >
                   <div class="flex items-center justify-between">
                     <div>
-                      <p class="font-bold text-gray-900">เงินสด</p>
-                      <p class="text-xs text-gray-500">ชำระเงินสดกับคนขับ</p>
+                      <p class="text-lg font-bold text-gray-900">เงินสด</p>
+                      <p class="text-sm text-gray-600 leading-snug">ชำระเงินสดกับคนขับ</p>
                     </div>
                   </div>
                 </button>
               </div>
 
               <div v-if="method === 'BANK_TRANSFER'" class="mt-4">
-                <p class="text-xs font-semibold text-gray-700">ช่องทางรับเงินของคนขับ</p>
-                <div v-if="isLoadingMethods" class="mt-2 text-xs text-gray-500">กำลังโหลด…</div>
-                <div v-else class="mt-2 space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-base font-bold text-slate-800">ช่องทางรับเงินของคนขับ</p>
+                  <p class="text-sm text-slate-500">เลือกโอนช่องทางใดก็ได้</p>
+                </div>
+                <div v-if="isLoadingMethods" class="mt-2 text-sm text-gray-500">กำลังโหลด…</div>
+                <div v-else class="mt-3 space-y-3">
                   <div
                     v-if="driverMethods.promptPayId"
-                    class="rounded-2xl border border-gray-200 p-4 flex items-center justify-between"
+                    class="rounded-2xl border border-gray-200 p-4 bg-white"
                   >
-                    <div>
-                      <p class="text-[11px] font-semibold text-gray-500">PROMPTPAY</p>
-                      <p class="font-bold text-gray-900">{{ driverMethods.promptPayId }}</p>
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-xs font-semibold text-gray-500 tracking-wide">PROMPTPAY ID</p>
+                        <p class="mt-1 font-extrabold text-gray-900 text-lg leading-none">
+                          {{ driverMethods.promptPayId }}
+                        </p>
+                        <p class="mt-1 text-sm text-slate-500">
+                          ชื่อผู้รับเงิน: <span class="font-semibold text-slate-700">{{ driverMethods.ownerName || receiverLabel }}</span>
+                        </p>
+                      </div>
+                      <div class="shrink-0 text-sm font-bold text-gray-500 bg-slate-50 border border-slate-100 px-2.5 py-1 rounded-full">
+                        PROMPTPAY
+                      </div>
                     </div>
-                    <div class="text-xs font-bold text-gray-500">PROMPTPAY</div>
                   </div>
+
+                <div
+                  v-if="driverMethods.promptPayQrUrl"
+                    class="rounded-2xl border border-gray-200 p-4 bg-white"
+                >
+                    <div class="flex items-center justify-between gap-3">
+                      <div>
+                        <p class="text-xs font-semibold text-gray-500 tracking-wide">QR CODE</p>
+                        <p class="mt-0.5 text-sm text-slate-500">สแกนเพื่อโอนเงิน</p>
+                      </div>
+                      <a
+                        :href="driverMethods.promptPayQrUrl"
+                        target="_blank"
+                        rel="noopener"
+                        class="shrink-0 inline-flex items-center justify-center px-3 py-2 rounded-xl bg-slate-50 text-slate-700 font-semibold text-sm hover:bg-slate-100 border border-slate-100"
+                      >
+                        เปิดเต็มจอ
+                      </a>
+                    </div>
+                    <div v-if="!isPdf(driverMethods.promptPayQrUrl)" class="mt-3 rounded-xl overflow-hidden border border-gray-100 bg-white">
+                      <img :src="driverMethods.promptPayQrUrl" class="w-full h-44 object-contain bg-white" alt="promptpay qr" />
+                    </div>
+                    <a
+                      v-else
+                      :href="driverMethods.promptPayQrUrl"
+                      target="_blank"
+                      rel="noopener"
+                      class="mt-3 inline-flex items-center justify-center w-full px-4 py-3 rounded-xl bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100"
+                    >
+                      เปิดไฟล์ QR (PDF)
+                    </a>
+                </div>
 
                   <div
                     v-for="acc in driverMethods.bankAccounts"
                     :key="acc.id"
-                    class="rounded-2xl border border-gray-200 p-4 flex items-center gap-3"
+                    class="rounded-2xl border border-gray-200 p-4 flex items-center gap-3 bg-white"
                   >
                     <div class="w-10 h-10 rounded-full overflow-hidden border border-gray-200 flex items-center justify-center"
                       :style="{ backgroundColor: bankColor(acc.bankCode) }"
@@ -109,16 +163,20 @@
                       <span v-else class="text-xs font-bold text-white">{{ bankBadge(acc.bankCode) }}</span>
                     </div>
                     <div class="min-w-0">
-                      <p class="font-bold text-gray-900 truncate">
+                      <p class="text-base font-bold text-gray-900 truncate leading-tight">
                         {{ bankLabel(acc.bankCode, acc.customBankName) }}
                       </p>
-                      <p class="text-xs text-gray-500">{{ acc.accountNumber }}</p>
+                      <p class="mt-1 text-sm text-gray-500 flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span class="font-bold text-slate-700 tracking-wide">{{ acc.accountNumber }}</span>
+                        <span v-if="driverMethods.ownerName" class="text-gray-300">•</span>
+                        <span v-if="driverMethods.ownerName" class="truncate">{{ driverMethods.ownerName }}</span>
+                      </p>
                     </div>
                   </div>
 
                   <div
                     v-if="!driverMethods.promptPayId && driverMethods.bankAccounts.length === 0"
-                    class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl p-3"
+                    class="text-sm text-amber-700 bg-amber-50 border border-amber-100 rounded-xl p-3"
                   >
                     คนขับยังไม่ได้ตั้งค่าช่องทางรับเงิน
                   </div>
@@ -128,8 +186,8 @@
 
             <!-- Step 2: upload slip -->
             <div v-else-if="step === 2" class="mt-5">
-              <p class="text-sm font-semibold text-gray-800">แนบหลักฐานการโอน</p>
-              <p class="mt-1 text-xs text-gray-500">อัปโหลดสลิปหรือภาพหน้าจอยืนยันการโอนเงิน</p>
+              <p class="text-base font-semibold text-gray-800">แนบหลักฐานการโอน</p>
+              <p class="mt-1 text-sm text-gray-500">อัปโหลดสลิปหรือภาพหน้าจอยืนยันการโอนเงิน</p>
 
               <div class="mt-4">
                 <label
@@ -141,14 +199,14 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16V4m0 12l-3-3m3 3l3-3M4 20h16" />
                     </svg>
                   </div>
-                  <p class="mt-3 font-semibold text-slate-700">คลิกหรือลากไฟล์มาวาง</p>
-                  <p class="text-xs text-slate-500">JPG, PNG, PDF · สูงสุด 10 MB</p>
+                  <p class="mt-3 text-base font-semibold text-slate-700">คลิกหรือลากไฟล์มาวาง</p>
+                  <p class="text-sm text-slate-500">JPG, PNG, PDF · สูงสุด 10 MB</p>
                 </label>
 
-                <p v-if="slipError" class="mt-2 text-xs text-red-600">{{ slipError }}</p>
+                <p v-if="slipError" class="mt-2 text-sm text-red-600">{{ slipError }}</p>
 
                 <div v-if="slipPreviewUrl" class="mt-4 rounded-2xl overflow-hidden border border-gray-200">
-                  <img :src="slipPreviewUrl" class="w-full h-44 object-cover" alt="slip preview" />
+                  <img :src="slipPreviewUrl" class="w-full h-48 object-cover" alt="slip preview" />
                 </div>
               </div>
             </div>
@@ -162,8 +220,8 @@
                   </svg>
                 </div>
                 <div class="min-w-0">
-                  <p class="font-bold text-slate-800">สรุปรายการชำระเงิน</p>
-                  <p class="text-xs text-slate-500 mt-1">
+                  <p class="text-base font-bold text-slate-800">สรุปรายการชำระเงิน</p>
+                  <p class="text-sm text-slate-500 mt-1">
                     วิธีชำระ: {{ method === 'CASH' ? 'เงินสด' : 'โอนเงิน' }}
                   </p>
                 </div>
@@ -225,7 +283,7 @@ const { toast } = useToast()
 const step = ref(1)
 const method = ref('BANK_TRANSFER') // BANK_TRANSFER | CASH
 const isLoadingMethods = ref(false)
-const driverMethods = ref({ promptPayId: null, bankAccounts: [] })
+const driverMethods = ref({ ownerName: null, promptPayId: null, promptPayQrUrl: null, bankAccounts: [] })
 
 const slipFile = ref(null)
 const slipPreviewUrl = ref('')
@@ -261,9 +319,9 @@ async function fetchDriverMethods() {
   isLoadingMethods.value = true
   try {
     const data = await $api(`/payments/booking/${props.trip.id}`)
-    driverMethods.value = data?.driverPaymentMethods || { promptPayId: null, bankAccounts: [] }
+    driverMethods.value = data?.driverPaymentMethods || { ownerName: null, promptPayId: null, promptPayQrUrl: null, bankAccounts: [] }
   } catch (e) {
-    driverMethods.value = { promptPayId: null, bankAccounts: [] }
+    driverMethods.value = { ownerName: null, promptPayId: null, promptPayQrUrl: null, bankAccounts: [] }
   } finally {
     isLoadingMethods.value = false
   }
@@ -272,7 +330,7 @@ async function fetchDriverMethods() {
 function resetState() {
   step.value = 1
   method.value = 'BANK_TRANSFER'
-  driverMethods.value = { promptPayId: null, bankAccounts: [] }
+  driverMethods.value = { ownerName: null, promptPayId: null, promptPayQrUrl: null, bankAccounts: [] }
   slipFile.value = null
   slipError.value = ''
   if (slipPreviewUrl.value) URL.revokeObjectURL(slipPreviewUrl.value)
@@ -382,6 +440,10 @@ function bankColor(bankCode) {
     case 'BAAC': return '#15803D'
     default: return '#6B7280'
   }
+}
+
+function isPdf(url) {
+  return /\.pdf(\?|$)/i.test(String(url || ''))
 }
 
 watch(

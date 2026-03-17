@@ -45,6 +45,48 @@
                                     บันทึก
                                 </button>
                             </div>
+                            <div v-if="ownerName" class="mt-2 text-sm text-gray-600">
+                                ชื่อผู้รับเงิน: <span class="font-semibold text-gray-800">{{ ownerName }}</span>
+                            </div>
+
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <div class="flex items-center justify-between gap-3">
+                                    <div>
+                                        <div class="text-sm font-semibold text-gray-900">QR Code (ไฟล์)</div>
+                                        <div class="text-xs text-gray-500">JPG, PNG, PDF · สูงสุด 10 MB</div>
+                                    </div>
+                                    <label class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-700 bg-blue-50 rounded-md hover:bg-blue-100 cursor-pointer">
+                                        เลือกไฟล์
+                                        <input class="hidden" type="file" accept="image/*,application/pdf" @change="onQrSelected" />
+                                    </label>
+                                </div>
+
+                                <p v-if="qrError" class="mt-2 text-xs text-red-600">{{ qrError }}</p>
+
+                                <div v-if="qrPreviewUrl" class="mt-3 rounded-xl overflow-hidden border border-gray-200">
+                                    <img :src="qrPreviewUrl" class="w-full h-44 object-contain bg-white" alt="promptpay qr preview" />
+                                </div>
+                                <div v-else-if="promptPayQrUrl" class="mt-3">
+                                    <div v-if="!isPdfUrl(promptPayQrUrl)" class="rounded-xl overflow-hidden border border-gray-200">
+                                        <img :src="promptPayQrUrl" class="w-full h-44 object-contain bg-white" alt="promptpay qr" />
+                                    </div>
+                                    <a v-else :href="promptPayQrUrl" target="_blank" rel="noopener"
+                                        class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100">
+                                        เปิดไฟล์ QR (PDF)
+                                    </a>
+                                </div>
+
+                                <div class="mt-3 flex items-center gap-3">
+                                    <button type="button" @click="uploadPromptPayQr" :disabled="isUploadingQr || !qrFile"
+                                        class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed">
+                                        {{ isUploadingQr ? 'กำลังอัปโหลด...' : 'อัปโหลด QR' }}
+                                    </button>
+                                    <button v-if="qrFile" type="button" @click="clearQrSelection" :disabled="isUploadingQr"
+                                        class="inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-60 disabled:cursor-not-allowed">
+                                        ยกเลิกไฟล์
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- Bank accounts -->
@@ -92,6 +134,8 @@
                                                 </div>
                                                 <div class="text-sm text-gray-500">
                                                     {{ acc.accountNumber }}
+                                                    <span v-if="ownerName" class="text-gray-400">·</span>
+                                                    <span v-if="ownerName">{{ ownerName }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -194,8 +238,10 @@
 
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-700">ชื่อบัญชี</label>
-                        <input v-model="accountName" type="text" placeholder="ชื่อ-นามสกุล ตามบัญชีธนาคาร"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input v-model="accountName" type="text" placeholder="ชื่อ-นามสกุล ตามโปรไฟล์"
+                            readonly
+                            class="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 text-gray-700 focus:outline-none" />
+                        <p class="mt-1 text-xs text-gray-500">ระบบจะใช้ชื่อจากโปรไฟล์ของคุณอัตโนมัติ</p>
                     </div>
                 </div>
 
@@ -229,9 +275,16 @@ const { toast } = useToast()
 const isLoading = ref(false)
 const isSavingPromptPay = ref(false)
 const isSavingBank = ref(false)
+const isUploadingQr = ref(false)
 
 const promptPayId = ref('')
+const promptPayQrUrl = ref('')
+const ownerName = ref('')
 const bankAccounts = ref([])
+
+const qrFile = ref(null)
+const qrPreviewUrl = ref('')
+const qrError = ref('')
 
 const isModalOpen = ref(false)
 const editingId = ref(null)
@@ -256,7 +309,9 @@ const fetchPaymentInfo = async () => {
     isLoading.value = true
     try {
         const data = await $api('/payment-methods/me')
+        ownerName.value = data?.ownerName || ''
         promptPayId.value = data?.promptPayId || ''
+        promptPayQrUrl.value = data?.promptPayQrUrl || ''
         bankAccounts.value = Array.isArray(data?.bankAccounts) ? data.bankAccounts : []
     } catch (err) {
         toast.error('เกิดข้อผิดพลาด', err.data?.message || 'ไม่สามารถดึงข้อมูลการรับเงินได้')
@@ -280,11 +335,64 @@ const savePromptPay = async () => {
     }
 }
 
+const clearQrSelection = () => {
+    qrFile.value = null
+    qrError.value = ''
+    if (qrPreviewUrl.value) URL.revokeObjectURL(qrPreviewUrl.value)
+    qrPreviewUrl.value = ''
+}
+
+const onQrSelected = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 10 * 1024 * 1024) {
+        qrError.value = 'ไฟล์มีขนาดเกิน 10MB'
+        clearQrSelection()
+        return
+    }
+    const ok = file.type.startsWith('image/') || file.type === 'application/pdf'
+    if (!ok) {
+        qrError.value = 'รองรับเฉพาะไฟล์รูปภาพหรือ PDF'
+        clearQrSelection()
+        return
+    }
+    qrError.value = ''
+    qrFile.value = file
+    if (qrPreviewUrl.value) URL.revokeObjectURL(qrPreviewUrl.value)
+    qrPreviewUrl.value = file.type === 'application/pdf' ? '' : URL.createObjectURL(file)
+}
+
+const uploadPromptPayQr = async () => {
+    if (!qrFile.value) return
+    isUploadingQr.value = true
+    try {
+        const formData = new FormData()
+        formData.append('qr', qrFile.value)
+        const data = await $fetch(`${useRuntimeConfig().public.apiBase}payment-methods/promptpay-qr`, {
+            method: 'PUT',
+            body: formData,
+            headers: {
+                Authorization: `Bearer ${useCookie('token').value || ''}`,
+            },
+        })
+        promptPayQrUrl.value = data?.promptPayQrUrl || data?.data?.promptPayQrUrl || ''
+        toast.success('อัปโหลดสำเร็จ', 'อัปโหลดไฟล์ QR เรียบร้อยแล้ว')
+        clearQrSelection()
+        await fetchPaymentInfo()
+    } catch (err) {
+        toast.error('เกิดข้อผิดพลาด', err?.statusMessage || err?.data?.message || 'ไม่สามารถอัปโหลดไฟล์ QR ได้')
+    } finally {
+        isUploadingQr.value = false
+    }
+}
+
+const isPdfUrl = (url) => /\.pdf(\?|$)/i.test(String(url || ''))
+
 const openAddModal = () => {
     editingId.value = null
     selectedBank.value = null
     accountNumber.value = ''
-    accountName.value = ''
+    accountName.value = ownerName.value || ''
     isBankDropdownOpen.value = false
     isModalOpen.value = true
 }
@@ -298,7 +406,7 @@ const openEditModal = (acc) => {
         color: '#6B7280',
     }
     accountNumber.value = acc.accountNumber || ''
-    accountName.value = acc.accountName || ''
+    accountName.value = ownerName.value || acc.accountName || ''
     isBankDropdownOpen.value = false
     isModalOpen.value = true
 }
@@ -324,7 +432,7 @@ const submitBankAccount = async () => {
             bankCode: selectedBank.value?.code || '',
             customBankName: null,
             accountNumber: (accountNumber.value || '').trim(),
-            accountName: (accountName.value || '').trim(),
+            accountName: (ownerName.value || accountName.value || '').trim(),
         }
 
         if (editingId.value) {
@@ -403,6 +511,7 @@ onMounted(() => {
 onUnmounted(() => {
     document.removeEventListener('click', onClickOutside)
     document.removeEventListener('keydown', onKey)
+    if (qrPreviewUrl.value) URL.revokeObjectURL(qrPreviewUrl.value)
 })
 </script>
 
