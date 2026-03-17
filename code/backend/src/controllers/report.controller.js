@@ -2,6 +2,14 @@ const asyncHandler = require('express-async-handler');
 const reportService = require('../services/report.service');
 const { uploadToCloudinary } = require('../utils/cloudinary');
 
+const getAttachmentTypeFromMime = (mimetype = '') => {
+    if (mimetype.startsWith('image/')) return 'image';
+    if (mimetype.startsWith('video/')) return 'video';
+    if (mimetype.startsWith('audio/')) return 'audio';
+    if (mimetype === 'application/pdf') return 'pdf';
+    return 'file';
+};
+
 /** POST /reports — User creates a new report */
 const createReport = asyncHandler(async (req, res) => {
     let attachments = [];
@@ -14,9 +22,11 @@ const createReport = asyncHandler(async (req, res) => {
 
         const results = await Promise.all(uploadPromises);
 
-        attachments = results.map(result => ({
+        attachments = results.map((result, index) => ({
             url: result.url,
             resourceType: result.resource_type, // image / video / raw
+            fileType: getAttachmentTypeFromMime(req.files[index]?.mimetype),
+            mimeType: req.files[index]?.mimetype,
         }));
     }
 

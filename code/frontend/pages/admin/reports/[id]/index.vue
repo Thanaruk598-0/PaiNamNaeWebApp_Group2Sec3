@@ -180,7 +180,7 @@
                 <label
                   class="text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  ภาพ/วิดีโอประกอบ
+                  ไฟล์แนบประกอบ
                 </label>
 
                 <!-- Section divider + count -->
@@ -197,100 +197,78 @@
 
                 <!-- Filmstrip Row -->
                 <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                  <!-- IMAGE -->
                   <div
-                    v-for="(file, index) in report.attachments.filter(
-                      (f) => f.resourceType === 'image',
-                    )"
-                    :key="'img-' + index"
+                    v-for="(file, index) in report.attachments"
+                    :key="'attachment-' + index"
                     class="relative flex-shrink-0 w-40 h-28 rounded-xl overflow-hidden bg-gray-100 shadow-sm cursor-pointer ring-2 ring-transparent hover:ring-blue-400 hover:ring-offset-2 transition-all duration-200 group"
-                    @click="lightbox = { url: file.url, type: 'image' }"
+                    @click="openAttachment(file)"
                   >
-                    <img
-                      :src="file.url"
-                      class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
+                    <template v-if="resolveAttachmentType(file) === 'image'">
+                      <img
+                        :src="file.url"
+                        class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </template>
 
-                    <!-- Hover overlay + zoom icon -->
-                    <div
-                      class="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-200 flex items-center justify-center"
+                    <template
+                      v-else-if="resolveAttachmentType(file) === 'video'"
+                    >
+                      <img
+                        :src="getVideoThumbnail(file.url)"
+                        class="w-full h-full object-cover opacity-90 transition-all duration-300 group-hover:scale-105 group-hover:opacity-70"
+                        @error="(e) => (e.target.style.display = 'none')"
+                      />
+                      <div
+                        class="absolute inset-0 flex items-center justify-center"
+                      >
+                        <div
+                          class="w-10 h-10 rounded-full bg-black/50 border-2 border-white/40 flex items-center justify-center shadow-xl transition-all duration-200 group-hover:scale-110 group-hover:bg-blue-500/80 group-hover:border-blue-300"
+                        >
+                          <i
+                            class="fas fa-play text-white text-sm pl-0.5 drop-shadow"
+                          ></i>
+                        </div>
+                      </div>
+                    </template>
+
+                    <template
+                      v-else-if="resolveAttachmentType(file) === 'audio'"
                     >
                       <div
-                        class="w-9 h-9 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg scale-0 group-hover:scale-100 transition-transform duration-200"
+                        class="w-full h-full bg-gradient-to-br from-emerald-50 to-cyan-100 flex flex-col items-center justify-center gap-2"
                       >
-                        <i
-                          class="fas fa-magnifying-glass-plus text-white text-sm drop-shadow"
-                        ></i>
+                        <i class="fas fa-music text-emerald-600 text-xl"></i>
+                        <span class="text-xs font-semibold text-emerald-700"
+                          >AUDIO</span
+                        >
                       </div>
-                    </div>
+                    </template>
 
-                    <!-- Type badge -->
-                    <div class="absolute top-1.5 left-1.5">
-                      <span
-                        class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-black/50 backdrop-blur-sm text-white text-[10px] font-semibold rounded-md"
-                      >
-                        <i class="fas fa-image text-[9px] text-blue-300"></i>
-                        IMG
-                      </span>
-                    </div>
-
-                    <!-- Index badge on hover -->
-                    <div
-                      class="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <span
-                        class="w-5 h-5 bg-black/50 backdrop-blur-sm text-white text-[10px] font-bold rounded-full flex items-center justify-center"
-                      >
-                        {{ index + 1 }}
-                      </span>
-                    </div>
-
-                    <!-- Bottom gradient slide up -->
-                    <div
-                      class="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/50 to-transparent translate-y-full group-hover:translate-y-0 transition-transform duration-200"
-                    ></div>
-                  </div>
-
-                  <!-- VIDEO -->
-                  <div
-                    v-for="(file, index) in report.attachments.filter(
-                      (f) => f.resourceType === 'video',
-                    )"
-                    :key="'vid-' + index"
-                    class="relative flex-shrink-0 w-40 h-28 rounded-xl overflow-hidden bg-gray-900 shadow-sm cursor-pointer ring-2 ring-transparent hover:ring-blue-400 hover:ring-offset-2 transition-all duration-200 group"
-                    @click="lightbox = { url: file.url, type: 'video' }"
-                  >
-                    <!-- Thumbnail -->
-                    <img
-                      :src="getVideoThumbnail(file.url)"
-                      class="w-full h-full object-cover opacity-90 transition-all duration-300 group-hover:scale-105 group-hover:opacity-70"
-                      @error="(e) => (e.target.style.display = 'none')"
-                    />
-
-                    <!-- Play button -->
-                    <div
-                      class="absolute inset-0 flex items-center justify-center"
-                    >
+                    <template v-else>
                       <div
-                        class="w-10 h-10 rounded-full bg-black/50 border-2 border-white/40 flex items-center justify-center shadow-xl transition-all duration-200 group-hover:scale-110 group-hover:bg-blue-500/80 group-hover:border-blue-300"
+                        class="w-full h-full bg-gradient-to-br from-rose-50 to-orange-100 flex flex-col items-center justify-center gap-2"
                       >
-                        <i
-                          class="fas fa-play text-white text-sm pl-0.5 drop-shadow"
-                        ></i>
+                        <i class="fas fa-file-pdf text-rose-600 text-xl"></i>
+                        <span class="text-xs font-semibold text-rose-700"
+                          >PDF</span
+                        >
                       </div>
-                    </div>
+                    </template>
 
-                    <!-- Type badge -->
                     <div class="absolute top-1.5 left-1.5">
                       <span
                         class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-black/60 backdrop-blur-sm text-white text-[10px] font-semibold rounded-md"
                       >
-                        <i class="fas fa-video text-[9px] text-purple-300"></i>
-                        VDO
+                        <i
+                          class="fas"
+                          :class="
+                            attachmentTypeIcon(resolveAttachmentType(file))
+                          "
+                        ></i>
+                        {{ attachmentTypeLabel(resolveAttachmentType(file)) }}
                       </span>
                     </div>
 
-                    <!-- Index badge on hover -->
                     <div
                       class="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
@@ -300,45 +278,7 @@
                         {{ index + 1 }}
                       </span>
                     </div>
-
-                    <!-- Bottom bar -->
-                    <div
-                      class="absolute inset-x-0 bottom-0 px-2 py-1.5 bg-gradient-to-t from-black/70 to-transparent"
-                    >
-                      <span
-                        class="text-[10px] text-white/70 font-medium opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <i class="fas fa-circle-play mr-1 text-purple-300"></i
-                        >แตะเพื่อเล่น
-                      </span>
-                    </div>
                   </div>
-
-                  <!-- OTHER files -->
-                  <a
-                    v-for="(file, index) in report.attachments.filter(
-                      (f) =>
-                        f.resourceType !== 'image' &&
-                        f.resourceType !== 'video',
-                    )"
-                    :key="'file-' + index"
-                    :href="file.url"
-                    target="_blank"
-                    class="relative flex-shrink-0 w-40 h-28 rounded-xl overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-dashed border-gray-200 hover:border-blue-300 hover:from-blue-50 hover:to-indigo-50 flex flex-col items-center justify-center gap-2 transition-all duration-200 shadow-sm group"
-                  >
-                    <div
-                      class="w-10 h-10 rounded-full bg-white shadow-sm border border-gray-200 flex items-center justify-center group-hover:bg-blue-500 group-hover:border-blue-500 transition-colors duration-200"
-                    >
-                      <i
-                        class="fas fa-file text-gray-400 group-hover:text-white transition-colors duration-200 text-lg"
-                      ></i>
-                    </div>
-                    <span
-                      class="text-xs text-gray-500 group-hover:text-blue-600 font-medium transition-colors"
-                    >
-                      เปิดไฟล์
-                    </span>
-                  </a>
                 </div>
               </div>
 
@@ -797,6 +737,25 @@
           autoplay
           class="max-w-full max-h-[85vh] rounded-xl shadow-2xl mx-auto"
         ></video>
+
+        <audio
+          v-else-if="lightbox.type === 'audio'"
+          :src="lightbox.url"
+          controls
+          autoplay
+          class="w-[min(90vw,560px)] mx-auto"
+        ></audio>
+
+        <a
+          v-else-if="lightbox.type === 'pdf'"
+          :href="lightbox.url"
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-gray-700 shadow-lg hover:text-red-600"
+        >
+          <i class="fas fa-file-pdf"></i>
+          เปิดไฟล์ PDF ในแท็บใหม่
+        </a>
       </div>
     </div>
   </div>
@@ -833,8 +792,61 @@ const report = ref(null);
 const editForm = ref({ status: "", adminNote: "" });
 const lightbox = ref({
   url: null,
-  type: null, // 'image' | 'video'
+  type: null, // 'image' | 'video' | 'audio' | 'pdf'
 });
+
+function getFileTypeFromMime(mimeType = "") {
+  if (mimeType.startsWith("image/")) return "image";
+  if (mimeType.startsWith("video/")) return "video";
+  if (mimeType.startsWith("audio/")) return "audio";
+  if (mimeType === "application/pdf") return "pdf";
+  return null;
+}
+
+function inferAttachmentTypeFromUrl(url = "") {
+  const normalized = (url || "").toLowerCase();
+  if (normalized.includes(".pdf")) return "pdf";
+  if (/(\.mp3|\.wav|\.m4a|\.aac|\.ogg)(\?|$)/.test(normalized)) {
+    return "audio";
+  }
+  return "video";
+}
+
+function resolveAttachmentType(file) {
+  if (file?.fileType) return file.fileType;
+  if (file?.mimeType) {
+    const fromMime = getFileTypeFromMime(file.mimeType);
+    if (fromMime) return fromMime;
+  }
+  if (file?.resourceType === "image") return "image";
+  if (file?.resourceType === "video") {
+    return inferAttachmentTypeFromUrl(file.url);
+  }
+  return "pdf";
+}
+
+function attachmentTypeLabel(type) {
+  if (type === "image") return "IMG";
+  if (type === "video") return "VDO";
+  if (type === "audio") return "AUDIO";
+  return "PDF";
+}
+
+function attachmentTypeIcon(type) {
+  if (type === "image") return "fa-image text-[9px] text-blue-300";
+  if (type === "video") return "fa-video text-[9px] text-purple-300";
+  if (type === "audio") return "fa-music text-[9px] text-emerald-300";
+  return "fa-file-pdf text-[9px] text-rose-300";
+}
+
+function openAttachment(file) {
+  const type = resolveAttachmentType(file);
+  if (type === "pdf") {
+    window.open(file.url, "_blank", "noopener");
+    return;
+  }
+  lightbox.value = { url: file.url, type };
+}
 const detailMapContainer = ref(null);
 
 // Computed: ผู้ถูกแจ้ง (reported user)

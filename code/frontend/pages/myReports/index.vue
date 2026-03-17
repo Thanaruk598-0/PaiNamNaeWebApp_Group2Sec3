@@ -202,7 +202,8 @@
                     }}
                   </p>
                   <p class="text-xs text-gray-400 mt-0.5">
-                    รูปภาพ &amp; วิดีโอ • สูงสุด 5 ไฟล์ • ไม่เกิน 20MB/ไฟล์
+                    รูปภาพ/PDF ไม่เกิน 10MB • วิดีโอ/เสียง ไม่เกิน 100MB •
+                    สูงสุด 5 ไฟล์
                   </p>
                 </div>
 
@@ -218,13 +219,23 @@
                   >
                     <i class="fas fa-video text-purple-400"></i> MP4 / MOV
                   </span>
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-gray-200 text-gray-500 text-[10px] font-medium rounded-full shadow-sm"
+                  >
+                    <i class="fas fa-music text-emerald-500"></i> MP3 / WAV
+                  </span>
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-gray-200 text-gray-500 text-[10px] font-medium rounded-full shadow-sm"
+                  >
+                    <i class="fas fa-file-pdf text-rose-500"></i> PDF
+                  </span>
                 </div>
               </div>
 
               <input
                 type="file"
                 multiple
-                accept="image/*,video/mp4,video/quicktime"
+                accept="image/*,video/*,audio/*,application/pdf"
                 class="hidden"
                 @change="handleFileChange"
               />
@@ -238,7 +249,7 @@
                   v-for="(item, index) in previewFiles"
                   :key="index"
                   class="relative group aspect-square rounded-xl overflow-hidden bg-gray-100 shadow-sm ring-2 ring-transparent hover:ring-blue-400 hover:ring-offset-2 transition-all duration-200 cursor-pointer"
-                  @click="openLightbox(item.url, item.type)"
+                  @click="handlePreviewClick(item)"
                 >
                   <!-- Image -->
                   <img
@@ -248,7 +259,7 @@
                   />
 
                   <!-- Video -->
-                  <template v-else>
+                  <template v-else-if="item.type === 'video'">
                     <video
                       :src="item.url"
                       muted
@@ -276,6 +287,37 @@
                         <i class="fas fa-video text-[8px] text-blue-300"></i>
                         VDO
                       </span>
+                    </div>
+                  </template>
+
+                  <!-- Audio -->
+                  <template v-else-if="item.type === 'audio'">
+                    <div
+                      class="w-full h-full bg-gradient-to-br from-emerald-50 to-cyan-100 p-2 flex flex-col justify-between"
+                    >
+                      <div
+                        class="flex items-center gap-1 text-emerald-700 text-[10px] font-semibold"
+                      >
+                        <i class="fas fa-music"></i>
+                        AUDIO
+                      </div>
+                      <audio
+                        :src="item.url"
+                        controls
+                        class="w-full h-8"
+                      ></audio>
+                    </div>
+                  </template>
+
+                  <!-- PDF -->
+                  <template v-else>
+                    <div
+                      class="w-full h-full bg-gradient-to-br from-rose-50 to-orange-100 flex flex-col items-center justify-center gap-1 px-2 text-center"
+                    >
+                      <i class="fas fa-file-pdf text-2xl text-rose-600"></i>
+                      <span class="text-[9px] font-semibold text-rose-700"
+                        >PDF</span
+                      >
                     </div>
                   </template>
 
@@ -332,7 +374,7 @@
                   <input
                     type="file"
                     multiple
-                    accept="image/*,video/mp4,video/quicktime"
+                    accept="image/*,video/*,audio/*,application/pdf"
                     class="hidden"
                     @change="handleFileChange"
                   />
@@ -504,10 +546,10 @@
                       v-for="(file, index) in r.attachments"
                       :key="index"
                       class="relative flex-shrink-0 w-28 h-20 rounded-xl overflow-hidden cursor-pointer ring-2 ring-transparent hover:ring-blue-400 hover:ring-offset-1 shadow-sm hover:shadow-md transition-all duration-200 group"
-                      @click="openLightbox(file.url, file.resourceType)"
+                      @click="openAttachment(file)"
                     >
                       <!-- ── IMAGE ── -->
-                      <template v-if="file.resourceType === 'image'">
+                      <template v-if="resolveAttachmentType(file) === 'image'">
                         <img
                           :src="file.url"
                           class="w-full h-full object-cover transition duration-300 group-hover:scale-110"
@@ -543,7 +585,9 @@
                       </template>
 
                       <!-- ── VIDEO ── -->
-                      <template v-else-if="file.resourceType === 'video'">
+                      <template
+                        v-else-if="resolveAttachmentType(file) === 'video'"
+                      >
                         <img
                           :src="getVideoThumbnail(file.url)"
                           class="w-full h-full object-cover transition duration-300 group-hover:scale-110"
@@ -588,6 +632,33 @@
                               แตะเพื่อเล่น
                             </span>
                           </div>
+                        </div>
+                      </template>
+
+                      <!-- ── AUDIO ── -->
+                      <template
+                        v-else-if="resolveAttachmentType(file) === 'audio'"
+                      >
+                        <div
+                          class="w-full h-full bg-gradient-to-br from-emerald-50 to-cyan-100 p-2 flex flex-col justify-center items-center gap-1"
+                        >
+                          <i class="fas fa-music text-emerald-600"></i>
+                          <span
+                            class="text-[10px] font-semibold text-emerald-700"
+                            >AUDIO</span
+                          >
+                        </div>
+                      </template>
+
+                      <!-- ── PDF ── -->
+                      <template v-else>
+                        <div
+                          class="w-full h-full bg-gradient-to-br from-rose-50 to-orange-100 p-2 flex flex-col justify-center items-center gap-1"
+                        >
+                          <i class="fas fa-file-pdf text-rose-600"></i>
+                          <span class="text-[10px] font-semibold text-rose-700"
+                            >PDF</span
+                          >
                         </div>
                       </template>
 
@@ -688,6 +759,25 @@
           autoplay
           class="max-w-full max-h-[85vh] rounded-xl shadow-2xl"
         ></video>
+
+        <audio
+          v-else-if="lightboxType === 'audio'"
+          :src="lightboxUrl"
+          controls
+          autoplay
+          class="w-[min(90vw,560px)]"
+        ></audio>
+
+        <a
+          v-else-if="lightboxType === 'pdf'"
+          :href="lightboxUrl"
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white text-gray-700 shadow-lg hover:text-red-600"
+        >
+          <i class="fas fa-file-pdf"></i>
+          เปิดไฟล์ PDF ในแท็บใหม่
+        </a>
       </div>
     </div>
 
@@ -1170,13 +1260,57 @@ function onIncidentTypeChange() {
   form.value.customTitle = ""; // reset custom title
 }
 
+const MAX_FILE_SIZE = {
+  image: 10 * 1024 * 1024,
+  video: 100 * 1024 * 1024,
+  audio: 100 * 1024 * 1024,
+  pdf: 10 * 1024 * 1024,
+};
+
+function getFileTypeFromMime(mimeType = "") {
+  if (mimeType.startsWith("image/")) return "image";
+  if (mimeType.startsWith("video/")) return "video";
+  if (mimeType.startsWith("audio/")) return "audio";
+  if (mimeType === "application/pdf") return "pdf";
+  return null;
+}
+
+function inferAttachmentTypeFromUrl(url = "") {
+  const normalized = (url || "").toLowerCase();
+  if (normalized.includes(".pdf")) return "pdf";
+  if (/(\.mp3|\.wav|\.m4a|\.aac|\.ogg)(\?|$)/.test(normalized)) return "audio";
+  return "video";
+}
+
+function resolveAttachmentType(file) {
+  if (file?.fileType) return file.fileType;
+  if (file?.mimeType) {
+    const fromMime = getFileTypeFromMime(file.mimeType);
+    if (fromMime) return fromMime;
+  }
+  if (file?.resourceType === "image") return "image";
+  if (file?.resourceType === "video") {
+    return inferAttachmentTypeFromUrl(file.url);
+  }
+  return "pdf";
+}
+
 function handleFileChange(event) {
   const files = Array.from(event.target.files);
 
   files.forEach((file) => {
-    if (!file.type.startsWith("image/") && !file.type.startsWith("video/")) {
-      // replace native alert with toast notification so it appears in bottom-right
-      toast.error("อนุญาตเฉพาะรูปภาพและวิดีโอเท่านั้น");
+    const fileType = getFileTypeFromMime(file.type);
+    if (!fileType) {
+      toast.error("อนุญาตเฉพาะรูปภาพ วิดีโอ ไฟล์เสียง และ PDF เท่านั้น");
+      return;
+    }
+
+    const maxSize = MAX_FILE_SIZE[fileType];
+    if (file.size > maxSize) {
+      const maxSizeMb = Math.floor(maxSize / (1024 * 1024));
+      toast.error(
+        `ไฟล์ ${fileType.toUpperCase()} ต้องมีขนาดไม่เกิน ${maxSizeMb} MB`,
+      );
       return;
     }
 
@@ -1190,7 +1324,7 @@ function handleFileChange(event) {
     previewFiles.value.push({
       file,
       url: URL.createObjectURL(file),
-      type: file.type.startsWith("image/") ? "image" : "video",
+      type: fileType,
     });
   });
 
@@ -1209,6 +1343,23 @@ function getVideoThumbnail(videoUrl) {
   return videoUrl
     .replace("/video/upload/", "/video/upload/so_1,w_300,h_200,c_fill/")
     .replace(/\.(mp4|mov|webm)$/i, ".jpg");
+}
+
+function handlePreviewClick(item) {
+  if (item.type === "pdf") {
+    window.open(item.url, "_blank", "noopener");
+    return;
+  }
+  openLightbox(item.url, item.type);
+}
+
+function openAttachment(file) {
+  const fileType = resolveAttachmentType(file);
+  if (fileType === "pdf") {
+    window.open(file.url, "_blank", "noopener");
+    return;
+  }
+  openLightbox(file.url, fileType);
 }
 
 // Map
