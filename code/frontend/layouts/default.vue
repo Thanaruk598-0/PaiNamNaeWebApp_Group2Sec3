@@ -101,7 +101,7 @@
                 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden z-[60] origin-top" @click.stop>
                                     <!-- Header -->
                                     <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                                        <h3 class="text-lg font-semibold text-gray-800">Notification</h3>
+                                        <h3 class="text-lg font-semibold text-gray-800">การแจ้งเตือน</h3>
                                         <button class="p-1 text-gray-500 hover:text-gray-700"
                                             @click="openNotif = false">
                                             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -187,7 +187,7 @@
                                         <NuxtLink to="/notifications"
                                             class="block w-full px-4 py-2 text-sm font-medium text-center text-blue-700 rounded-lg bg-blue-50 hover:bg-blue-100"
                                             @click="openNotif = false">
-                                            View All Notification
+                                            ดูการแจ้งเตือนทั้งหมด
                                         </NuxtLink>
                                     </div>
                                 </div>
@@ -252,11 +252,11 @@
                                 </NuxtLink>
                                 <NuxtLink to="/admin/users"
                                     class="flex items-center block w-full px-4 py-2 text-left text-gray-700 transition-colors duration-200 hover:bg-blue-50 hover:text-blue-600">
-                                    Dashboard
+                                    แดชบอร์ด
                                 </NuxtLink>
                                 <button @click="logout"
                                     class="flex items-center block w-full px-4 py-2 text-left text-red-600 transition-colors duration-200 hover:bg-red-50 hover:text-red-700">
-                                    Logout
+                                    ออกจากระบบ
                                 </button>
                             </div>
                         </div>
@@ -391,11 +391,11 @@
                                 </NuxtLink>
                                 <NuxtLink to="/admin/users" @click="closeMobileMenu"
                                     class="flex items-center block w-full px-3 py-2 text-left text-gray-600 transition-colors duration-200 rounded-md hover:bg-blue-50 hover:text-blue-600">
-                                    Dashboard
+                                    แดชบอร์ด
                                 </NuxtLink>
                                 <button @click="logout"
                                     class="flex items-center block w-full px-3 py-2 text-left text-red-600 transition-colors duration-200 rounded-md hover:bg-red-50 hover:text-red-700">
-                                    Logout
+                                    ออกจากระบบ
                                 </button>
                             </div>
                         </div>
