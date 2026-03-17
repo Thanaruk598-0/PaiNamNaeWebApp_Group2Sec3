@@ -9,7 +9,7 @@
                 <!-- Title + Controls -->
                 <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                     <h1 class="text-2xl font-semibold text-gray-800">
-                        <i class="fas fa-flag mr-2 text-orange-500"></i>Report Management
+                        <i class="fas fa-flag mr-2 text-orange-500"></i>การจัดการรายงาน
                     </h1>
                     <div class="flex items-center gap-2">
                         <input v-model.trim="filters.q" @keyup.enter="applyFilters" type="text"
@@ -189,7 +189,7 @@
                     <div
                         class="flex flex-col gap-3 px-4 py-4 border-t border-gray-200 sm:px-6 sm:flex-row sm:items-center sm:justify-between">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs text-gray-500">Limit:</span>
+                            <span class="text-xs text-gray-500">จำกัด:</span>
                             <select v-model.number="pagination.limit" @change="applyFilters"
                                 class="px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-blue-500">
                                 <option :value="10">10</option>
@@ -200,7 +200,7 @@
                         <nav class="flex items-center gap-1">
                             <button class="px-3 py-2 text-sm border rounded-md disabled:opacity-50"
                                 :disabled="pagination.page <= 1 || isLoading"
-                                @click="changePage(pagination.page - 1)">Previous</button>
+                                @click="changePage(pagination.page - 1)">ก่อนหน้า</button>
                             <template v-for="(p, idx) in pageButtons" :key="`p-${idx}-${p}`">
                                 <span v-if="p === '…'" class="px-2 text-sm text-gray-500">…</span>
                                 <button v-else class="px-3 py-2 text-sm border rounded-md"
@@ -209,7 +209,7 @@
                             </template>
                             <button class="px-3 py-2 text-sm border rounded-md disabled:opacity-50"
                                 :disabled="pagination.page >= totalPages || isLoading"
-                                @click="changePage(pagination.page + 1)">Next</button>
+                                @click="changePage(pagination.page + 1)">ถัดไป</button>
                         </nav>
                     </div>
                 </div>

@@ -40,11 +40,11 @@
                         </NuxtLink>
                         <NuxtLink to="/admin/users"
                             class="flex items-center block w-full px-4 py-2 text-left text-gray-700 transition-colors duration-200 hover:bg-blue-50 hover:text-blue-600">
-                            Dashboard
+                            แดชบอร์ด
                         </NuxtLink>
                         <button @click="handleLogout"
                             class="flex items-center block w-full px-4 py-2 text-left text-red-600 transition-colors duration-200 hover:bg-red-50 hover:text-red-700">
-                            Logout
+                            ออกจากระบบ
                         </button>
                     </div>
                 </div>

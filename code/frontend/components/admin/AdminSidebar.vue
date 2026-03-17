@@ -12,48 +12,48 @@
                 <NuxtLink to="/admin/users"
                     class="sidebar-item flex items-center gap-3 px-3 py-2.5 text-gray-700 rounded-lg hover:bg-blue-50">
                     <i class="w-6 text-lg text-center text-gray-500 fas fa-user"></i>
-                    <span class="sidebar-text">User Management</span>
+                    <span class="sidebar-text">การจัดการผู้ใช้</span>
                 </NuxtLink>
 
                 <NuxtLink to="/admin/vehicles"
                     class="sidebar-item flex items-center gap-3 px-3 py-2.5 text-gray-700 rounded-lg hover:bg-blue-50"
                     active-class="font-semibold text-blue-600 bg-blue-50">
                     <i class="w-6 text-lg text-center text-gray-500 fas fa-car-side"></i>
-                    <span class="sidebar-text">Vehicle Management</span>
+                    <span class="sidebar-text">การจัดการยานพาหนะ</span>
                 </NuxtLink>
 
                 <NuxtLink to="/admin/routes"
                     class="sidebar-item flex items-center gap-3 px-3 py-2.5 text-gray-700 rounded-lg hover:bg-blue-50"
                     active-class="font-semibold text-blue-600 bg-blue-50">
                     <i class="w-6 text-lg text-center text-gray-500 fas fa-route"></i>
-                    <span class="sidebar-text">Route Management</span>
+                    <span class="sidebar-text">การจัดการเส้นทาง</span>
                 </NuxtLink>
 
                 <NuxtLink to="/admin/bookings"
                     class="sidebar-item flex items-center gap-3 px-3 py-2.5 text-gray-700 rounded-lg hover:bg-blue-50"
                     active-class="font-semibold text-blue-600 bg-blue-50">
                     <i class="w-6 text-lg text-center text-gray-500 fas fa-calendar-check"></i>
-                    <span class="sidebar-text">Booking Management</span>
+                    <span class="sidebar-text">การจัดการการจอง</span>
                 </NuxtLink>
 
                 <NuxtLink to="/admin/driver-verifications"
                     class="sidebar-item flex items-center gap-3 px-3 py-2.5 text-gray-700 rounded-lg hover:bg-blue-50"
                     active-class="font-semibold text-blue-600 bg-blue-50">
                     <i class="w-6 text-lg text-center text-gray-500 fas fa-id-card"></i>
-                    <span class="sidebar-text">Driver Verification Management</span>
+                    <span class="sidebar-text">การจัดการการยืนยันตัวตนของคนขับ</span>
                 </NuxtLink>
 
                 <NuxtLink to="/admin/reports"
                     class="sidebar-item flex items-center gap-3 px-3 py-2.5 text-gray-700 rounded-lg hover:bg-blue-50"
                     active-class="font-semibold text-blue-600 bg-blue-50">
                     <i class="w-6 text-lg text-center text-gray-500 fas fa-flag"></i>
-                    <span class="sidebar-text">Report Management</span>
+                    <span class="sidebar-text">การจัดการรายงาน</span>
                 </NuxtLink>
 
                 <NuxtLink to="/"
                     class="sidebar-item flex items-center gap-3 px-3 py-2.5 text-gray-700 rounded-lg hover:bg-blue-50">
                     <i class="w-6 text-lg text-center text-gray-500 fas fa-home"></i>
-                    <span class="sidebar-text">Home</span>
+                    <span class="sidebar-text">หน้าหลัก</span>
                 </NuxtLink>
 
                 <!-- Settings -->
@@ -62,7 +62,7 @@
                         class="sidebar-item w-full flex items-center justify-between gap-3 px-3 py-2.5 text-gray-700 rounded-lg hover:bg-blue-50">
                         <div class="flex items-center gap-3">
                             <i class="w-6 text-lg text-center text-gray-500 fas fa-gear"></i>
-                            <span class="sidebar-text">Setting</span>
+                            <span class="sidebar-text">การตั้งค่า</span>
                         </div>
                         <i class="text-xs transition-transform fas fa-chevron-down sidebar-text"
                             id="ecom-menu-icon"></i>
@@ -70,7 +70,7 @@
 
                     <div id="ecom-menu" class="hidden mt-1 ml-12 space-y-1 sidebar-text">
                         <button @click="logout" class="block px-3 py-2 text-sm text-gray-600 hover:text-blue-600">
-                            Logout
+                            ออกจากระบบ
                         </button>
                     </div>
                 </div>

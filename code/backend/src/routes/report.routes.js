@@ -61,7 +61,8 @@ router.get(
 router.post(
     '/',
     protect,
-    uploadReport.array('attachments', 5), 
+    uploadReport.array('attachments', 5),
+    uploadReport.validateAttachmentSizes,
     validate({ body: createReportSchema }),
     reportController.createReport
 );

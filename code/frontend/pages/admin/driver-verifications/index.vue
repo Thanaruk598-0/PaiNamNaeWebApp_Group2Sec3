@@ -8,7 +8,7 @@
                 <!-- Header + Quick Actions -->
                 <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                     <div class="flex items-center gap-3">
-                        <h1 class="text-2xl font-semibold text-gray-800">Driver Verification Management</h1>
+                        <h1 class="text-2xl font-semibold text-gray-800">การจัดการยืนยันตัวตนของคนขับ</h1>
                         <button @click="onCreate"
                             class="inline-flex items-center gap-2 px-3 py-2 text-white bg-blue-600 rounded-md cursor-pointer hover:bg-blue-700">
                             <i class="fa-solid fa-plus"></i>
@@ -200,7 +200,7 @@
                         class="flex flex-col gap-3 px-4 py-4 border-t border-gray-200 sm:px-6 sm:flex-row sm:items-center sm:justify-between">
                         <div class="flex flex-wrap items-center gap-3 text-sm">
                             <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-500">Limit:</span>
+                                <span class="text-xs text-gray-500">จำกัด:</span>
                                 <select v-model.number="pagination.limit" @change="applyFilters"
                                     class="px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-blue-500">
                                     <option :value="10">10</option>
@@ -212,7 +212,7 @@
                         <nav class="flex items-center gap-1">
                             <button class="px-3 py-2 text-sm border rounded-md disabled:opacity-50"
                                 :disabled="pagination.page <= 1 || isLoading" @click="changePage(pagination.page - 1)">
-                                Previous
+                                ก่อนหน้า
                             </button>
                             <template v-for="(p, idx) in pageButtons" :key="`p-${idx}-${p}`">
                                 <span v-if="p === '…'" class="px-2 text-sm text-gray-500">…</span>
@@ -225,7 +225,7 @@
                             <button class="px-3 py-2 text-sm border rounded-md disabled:opacity-50"
                                 :disabled="pagination.page >= totalPages || isLoading"
                                 @click="changePage(pagination.page + 1)">
-                                Next
+                                ถัดไป
                             </button>
                         </nav>
                     </div>
