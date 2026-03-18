@@ -27,7 +27,11 @@ router.put(
 router.put(
   '/promptpay-qr',
   protect,
-  upload.single('qr'),
+  upload.fields([
+    { name: 'qr', maxCount: 1 },
+    { name: 'file', maxCount: 1 },
+    { name: 'promptPayQr', maxCount: 1 },
+  ]),
   paymentMethodController.updatePromptPayQr
 );
 

@@ -48,8 +48,10 @@
               <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
                 <input
                   v-model="promptPayId"
-                  @input="promptPayId = promptPayId.replace(/[^0-9]/g, '')"
+                  @input="promptPayId = sanitizeDigits(promptPayId, 13)"
                   type="text"
+                  inputmode="numeric"
+                  maxlength="13"
                   placeholder="ระบุช่องทาง PromptPay ชำระเงิน"
                   class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
@@ -408,7 +410,8 @@
               v-model="accountNumber"
               type="text"
               inputmode="numeric"
-              @input="accountNumber = accountNumber.replace(/\D/g, '')"
+              maxlength="12"
+              @input="accountNumber = sanitizeDigits(accountNumber, 12)"
               placeholder="ระบุเลขบัญชีธนาคาร (ตัวเลขเท่านั้น)"
               class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
@@ -490,9 +493,20 @@ const accountName = ref("");
 
 watch(accountNumber, (newVal) => {
   if (newVal) {
-    accountNumber.value = newVal.replace(/\D/g, "");
+    accountNumber.value = sanitizeDigits(newVal, 12);
   }
 });
+
+watch(promptPayId, (newVal) => {
+  if (newVal) {
+    promptPayId.value = sanitizeDigits(newVal, 13);
+  }
+});
+
+const sanitizeDigits = (value, maxLen) =>
+  String(value || "")
+    .replace(/\D/g, "")
+    .slice(0, maxLen);
 
 const banks = [
   { code: "KTB", name: "ธนาคารกรุงไทย", badge: "KTB", color: "#1D4ED8" },
@@ -533,10 +547,17 @@ const fetchPaymentInfo = async () => {
 const savePromptPay = async () => {
   isSavingPromptPay.value = true;
   try {
+    const promptPay = sanitizeDigits(promptPayId.value, 13);
+    if (!promptPay) {
+      toast.error("ข้อมูลไม่ถูกต้อง", "กรุณากรอก PromptPay");
+      return;
+    }
+
     await $api("/payment-methods/promptpay", {
       method: "PUT",
-      body: { promptPayId: (promptPayId.value || "").trim() },
+      body: { promptPayId: promptPay },
     });
+    promptPayId.value = promptPay;
     toast.success("บันทึกสำเร็จ", "อัปเดต PromptPay เรียบร้อยแล้ว");
   } catch (err) {
     toast.error(
@@ -582,16 +603,10 @@ const uploadPromptPayQr = async () => {
   try {
     const formData = new FormData();
     formData.append("qr", qrFile.value);
-    const data = await $fetch(
-      `${useRuntimeConfig().public.apiBase}payment-methods/promptpay-qr`,
-      {
-        method: "PUT",
-        body: formData,
-        headers: {
-          Authorization: `Bearer ${useCookie("token").value || ""}`,
-        },
-      },
-    );
+    const data = await $api("/payment-methods/promptpay-qr", {
+      method: "PUT",
+      body: formData,
+    });
     promptPayQrUrl.value =
       data?.promptPayQrUrl || data?.data?.promptPayQrUrl || "";
     toast.success("อัปโหลดสำเร็จ", "อัปโหลดไฟล์ QR เรียบร้อยแล้ว");
@@ -649,10 +664,16 @@ const selectBank = (b) => {
 const submitBankAccount = async () => {
   isSavingBank.value = true;
   try {
+    const normalizedAccountNumber = sanitizeDigits(accountNumber.value, 12);
+    if (normalizedAccountNumber.length < 10) {
+      toast.error("ข้อมูลไม่ถูกต้อง", "เลขที่บัญชีต้องมี 10-12 หลัก");
+      return;
+    }
+
     const payload = {
       bankCode: selectedBank.value?.code || "",
       customBankName: null,
-      accountNumber: (accountNumber.value || "").trim(),
+      accountNumber: normalizedAccountNumber,
       accountName: (ownerName.value || accountName.value || "").trim(),
     };
 

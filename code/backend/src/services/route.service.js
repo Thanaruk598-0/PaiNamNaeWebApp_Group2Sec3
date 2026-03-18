@@ -260,7 +260,7 @@ const getRouteById = async (id) => {
 };
 
 const getMyRoutes = async (driverId) => {
-  return prisma.route.findMany({
+  const routes = await prisma.route.findMany({
     where: {
       driverId
     },
@@ -284,7 +284,55 @@ const getMyRoutes = async (driverId) => {
     },
 
     orderBy: { createdAt: 'desc' },
-  })
+  });
+
+  const cancelledByDriverBookingIds = [];
+  const passengerIds = new Set();
+
+  for (const r of routes) {
+    for (const b of (r.bookings || [])) {
+      if (b.passengerId) passengerIds.add(b.passengerId);
+      if (
+        b.status === BookingStatus.CANCELLED &&
+        String(b.cancelledBy || '').toUpperCase() === 'DRIVER'
+      ) {
+        cancelledByDriverBookingIds.push(b.id);
+      }
+    }
+  }
+
+  if (cancelledByDriverBookingIds.length === 0) {
+    return routes;
+  }
+
+  const notifications = await prisma.notification.findMany({
+    where: {
+      userId: { in: Array.from(passengerIds) },
+      type: 'BOOKING',
+    },
+    select: {
+      metadata: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 2000,
+  });
+
+  const reasonNoteByBookingId = new Map();
+  for (const n of notifications) {
+    const md = n.metadata || {};
+    if (md.kind !== 'BOOKING_CANCELLED_BY_DRIVER') continue;
+    if (!md.bookingId || reasonNoteByBookingId.has(md.bookingId)) continue;
+    reasonNoteByBookingId.set(md.bookingId, md.reasonNote || null);
+  }
+
+  return routes.map((r) => ({
+    ...r,
+    bookings: (r.bookings || []).map((b) => ({
+      ...b,
+      cancelReasonNote: reasonNoteByBookingId.get(b.id) || null,
+    })),
+  }));
 }
 
 const createRoute = async (data) => {
