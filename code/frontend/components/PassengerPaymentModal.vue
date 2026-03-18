@@ -100,9 +100,22 @@
                     <div class="flex items-start justify-between gap-3">
                       <div class="min-w-0">
                         <p class="text-xs font-semibold text-gray-500 tracking-wide">PROMPTPAY ID</p>
-                        <p class="mt-1 font-extrabold text-gray-900 text-lg leading-none">
-                          {{ driverMethods.promptPayId }}
-                        </p>
+                        <div class="flex items-center gap-2">
+                          <p class="mt-1 font-extrabold text-gray-900 text-lg leading-none">
+                            {{ driverMethods.promptPayId }}
+                          </p>
+                          <button 
+                            type="button"
+                            @click="copyToClipboard(driverMethods.promptPayId, 'PromptPay ID')" 
+                            class="mt-1 p-1 text-blue-600 hover:bg-blue-50 rounded transition flex items-center justify-center" 
+                            title="คัดลอก PromptPay ID"
+                          >
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                          </button>
+                        </div>
                         <p class="mt-1 text-sm text-slate-500">
                           ชื่อผู้รับเงิน: <span class="font-semibold text-slate-700">{{ driverMethods.ownerName || receiverLabel }}</span>
                         </p>
@@ -167,7 +180,20 @@
                         {{ bankLabel(acc.bankCode, acc.customBankName) }}
                       </p>
                       <p class="mt-1 text-sm text-gray-500 flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span class="font-bold text-slate-700 tracking-wide">{{ acc.accountNumber }}</span>
+                        <span class="flex items-center gap-1.5 font-bold text-slate-700 tracking-wide">
+                          {{ acc.accountNumber }}
+                          <button 
+                            type="button"
+                            @click="copyToClipboard(acc.accountNumber, 'เลขบัญชี')" 
+                            class="p-1 text-blue-600 hover:bg-blue-50 rounded transition flex items-center justify-center" 
+                            title="คัดลอกเลขบัญชี"
+                          >
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                          </button>
+                        </span>
                         <span v-if="driverMethods.ownerName" class="text-gray-300">•</span>
                         <span v-if="driverMethods.ownerName" class="truncate">{{ driverMethods.ownerName }}</span>
                       </p>
@@ -444,6 +470,14 @@ function bankColor(bankCode) {
 
 function isPdf(url) {
   return /\.pdf(\?|$)/i.test(String(url || ''))
+}
+function copyToClipboard(text, label) {
+  if (!text) return
+  navigator.clipboard.writeText(text).then(() => {
+    toast.success(`คัดลอก ${label} เรียบร้อยแล้ว`)
+  }).catch(() => {
+    toast.error('ไม่สามารถคัดลอกได้')
+  })
 }
 
 watch(

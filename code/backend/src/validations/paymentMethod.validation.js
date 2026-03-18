@@ -6,8 +6,8 @@ const updatePromptPaySchema = z.object({
   promptPayId: z
     .string()
     .trim()
-    .min(1, 'กรุณากรอก PromptPay ID')
-    .max(100, 'PromptPay ID ยาวเกินไป'),
+    .min(1, 'กรุณากรอก PromptPay')
+    .max(100, 'PromptPayยาวเกินไป'),
 });
 
 const createBankAccountSchema = z.object({
