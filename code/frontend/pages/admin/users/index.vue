@@ -22,7 +22,7 @@
                     <!-- Right: Quick Search -->
                     <div class="flex items-center gap-2">
                         <input v-model.trim="filters.q" @keyup.enter="applyFilters" type="text"
-                            placeholder="ค้นหา : Email / User / Name"
+                            placeholder="ค้นหา : อีเมล / ผู้ใช้ / ชื่อผู้ใช้"
                             class="max-w-full px-3 py-2 border border-gray-300 rounded-md w-72 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                         <button @click="applyFilters"
                             class="px-4 py-2 text-white bg-blue-600 rounded-md cursor-pointer hover:bg-blue-700">
@@ -64,7 +64,7 @@
                         <!-- Departure From (4/24) -->
                         <div class="lg:col-span-4">
                             <label class="block mb-1 text-xs font-medium text-gray-600">ออกเดินทางตั้งแต่
-                                (YYYY-MM-DD)</label>
+                                (เดือน/วัน/ปี)</label>
                             <input v-model="filters.departureFrom" type="date"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500" />
                         </div>
