@@ -7,7 +7,8 @@ const updatePromptPaySchema = z.object({
     .string()
     .trim()
     .min(1, 'กรุณากรอก PromptPay')
-    .max(100, 'PromptPayยาวเกินไป'),
+    .max(13, 'PromptPay ต้องไม่เกิน 13 หลัก')
+    .regex(/^\d+$/, 'PromptPay ต้องเป็นตัวเลขเท่านั้น'),
 });
 
 const createBankAccountSchema = z.object({
@@ -16,8 +17,9 @@ const createBankAccountSchema = z.object({
   accountNumber: z
     .string()
     .trim()
-    .min(1, 'กรุณากรอกเลขที่บัญชี')
-    .max(50, 'เลขที่บัญชียาวเกินไป'),
+    .min(10, 'เลขที่บัญชีต้องมีอย่างน้อย 10 หลัก')
+    .max(12, 'เลขที่บัญชีต้องไม่เกิน 12 หลัก')
+    .regex(/^\d+$/, 'เลขที่บัญชีต้องเป็นตัวเลขเท่านั้น'),
   accountName: z
     .string()
     .trim()

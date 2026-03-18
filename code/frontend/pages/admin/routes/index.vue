@@ -63,7 +63,7 @@
                         <!-- Departure From (5/24) -->
                         <div class="lg:col-span-5">
                             <label class="block mb-1 text-xs font-medium text-gray-600">เวลาออกเดินทางตั้งแต่
-                                (YYYY-MM-DD)</label>
+                                (เดือน/วัน/ปี)</label>
                             <input v-model="filters.departureFrom" type="date"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500" />
                         </div>

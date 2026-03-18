@@ -5,6 +5,18 @@ const { checkAndApplyPassengerSuspension } = require('./penalty.service');
 
 const ACTIVE_STATUSES = [BookingStatus.PENDING, BookingStatus.CONFIRMED];
 
+const CANCEL_REASON_LABELS = {
+  CHANGE_OF_PLAN: 'เปลี่ยนแผน/มีธุระกะทันหัน',
+  FOUND_ALTERNATIVE: 'พบวิธีเดินทางอื่นแล้ว',
+  DRIVER_DELAY: 'คนขับล่าช้าหรือเลื่อนเวลา',
+  PRICE_ISSUE: 'ราคาหรือค่าใช้จ่ายไม่เหมาะสม',
+  WRONG_LOCATION: 'เลือกจุดรับ-ส่งผิด',
+  DUPLICATE_OR_WRONG_DATE: 'จองซ้ำหรือจองผิดวัน',
+  SAFETY_CONCERN: 'กังวลด้านความปลอดภัย',
+  WEATHER_OR_FORCE_MAJEURE: 'สภาพอากาศ/เหตุสุดวิสัย',
+  COMMUNICATION_ISSUE: 'สลิปการโอนไม่ถูกต้อง/ติดต่อไม่ได้'
+};
+
 const searchBookingsAdmin = async (opts = {}) => {
   const {
     page = 1,
@@ -282,7 +294,7 @@ const createBooking = async (data, passengerId) => {
 };
 
 const getMyBookings = async (passengerId) => {
-  return prisma.booking.findMany({
+  const bookings = await prisma.booking.findMany({
     where: { passengerId },
     include: {
       route: {
@@ -316,6 +328,44 @@ const getMyBookings = async (passengerId) => {
     },
     orderBy: { createdAt: 'desc' },
   });
+
+  const cancelledByDriverIds = bookings
+    .filter(
+      (b) =>
+        b.status === BookingStatus.CANCELLED &&
+        String(b.cancelledBy || '').toUpperCase() === 'DRIVER'
+    )
+    .map((b) => b.id);
+
+  if (cancelledByDriverIds.length === 0) {
+    return bookings;
+  }
+
+  const cancellationNotifications = await prisma.notification.findMany({
+    where: {
+      userId: passengerId,
+      type: 'BOOKING',
+    },
+    select: {
+      metadata: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 500,
+  });
+
+  const reasonNoteByBookingId = new Map();
+  for (const n of cancellationNotifications) {
+    const md = n.metadata || {};
+    if (md.kind !== 'BOOKING_CANCELLED_BY_DRIVER') continue;
+    if (!md.bookingId || reasonNoteByBookingId.has(md.bookingId)) continue;
+    reasonNoteByBookingId.set(md.bookingId, md.reasonNote || null);
+  }
+
+  return bookings.map((b) => ({
+    ...b,
+    cancelReasonNote: reasonNoteByBookingId.get(b.id) || null,
+  }));
 };
 
 const getBookingById = async (id) => {
@@ -382,20 +432,39 @@ const updateBookingStatus = async (id, status, userId) => {
   });
 };
 
-const cancelBooking = async (id, passengerId, opts = {}) => {
-  const { reason } = opts;
+const cancelBooking = async (id, userId, userRole, opts = {}) => {
+  const { reason, reasonNote } = opts;
 
   const booking = await prisma.booking.findUnique({
     where: { id },
     include: { route: true },
   });
   if (!booking) throw new ApiError(404, 'Booking not found');
-  if (booking.passengerId !== passengerId) throw new ApiError(403, 'Forbidden');
-  if (![BookingStatus.PENDING, BookingStatus.CONFIRMED].includes(booking.status)) {
-    throw new ApiError(400, 'Cannot cancel at this stage');
+
+  const isDriverCancelling = userRole === 'DRIVER';
+  const isPassengerCancelling = userRole === 'PASSENGER';
+
+  if (!isDriverCancelling && !isPassengerCancelling) {
+    throw new ApiError(403, 'Forbidden');
+  }
+
+  if (isDriverCancelling) {
+    if (booking.route.driverId !== userId) throw new ApiError(403, 'Forbidden');
+    if (booking.status !== BookingStatus.CONFIRMED) {
+      throw new ApiError(400, 'Only confirmed bookings can be cancelled by driver');
+    }
+  }
+
+  if (isPassengerCancelling) {
+    if (booking.passengerId !== userId) throw new ApiError(403, 'Forbidden');
+    if (![BookingStatus.PENDING, BookingStatus.CONFIRMED].includes(booking.status)) {
+      throw new ApiError(400, 'Cannot cancel at this stage');
+    }
   }
 
   const wasConfirmed = booking.status === BookingStatus.CONFIRMED;
+  const actor = isDriverCancelling ? 'DRIVER' : 'PASSENGER';
+  const normalizedReasonNote = (reasonNote || '').trim() || null;
 
   const updated = await prisma.$transaction(async (tx) => {
     const updatedBooking = await tx.booking.update({
@@ -403,7 +472,7 @@ const cancelBooking = async (id, passengerId, opts = {}) => {
       data: {
         status: BookingStatus.CANCELLED,
         cancelledAt: new Date(),
-        cancelledBy: 'PASSENGER',
+        cancelledBy: actor,
         cancelReason: reason || null,
       },
     });
@@ -420,10 +489,10 @@ const cancelBooking = async (id, passengerId, opts = {}) => {
       data: routeUpdates,
     });
 
-    if (wasConfirmed) {
+    if (isPassengerCancelling && wasConfirmed) {
       await tx.notification.create({
         data: {
-          userId: passengerId,
+          userId,
           type: 'SYSTEM',
           title: 'บันทึกการยกเลิกหลังยืนยัน',
           body: 'คุณได้ยกเลิกการจองที่เคยได้รับการยืนยันแล้ว',
@@ -432,11 +501,37 @@ const cancelBooking = async (id, passengerId, opts = {}) => {
       });
     }
 
+    if (isDriverCancelling) {
+      const reasonLabel = CANCEL_REASON_LABELS[reason] || reason || 'ไม่ระบุเหตุผล';
+      const body = normalizedReasonNote
+        ? `คนขับได้ยกเลิกการจองของคุณ เนื่องจาก: ${reasonLabel} (${normalizedReasonNote})`
+        : `คนขับได้ยกเลิกการจองของคุณ เนื่องจาก: ${reasonLabel}`;
+
+      await tx.notification.create({
+        data: {
+          userId: booking.passengerId,
+          type: 'BOOKING',
+          title: 'การจองถูกยกเลิกโดยคนขับ',
+          body,
+          link: '/myTrip',
+          metadata: {
+            kind: 'BOOKING_CANCELLED_BY_DRIVER',
+            bookingId: id,
+            routeId: booking.route.id,
+            status: 'CANCELLED',
+            by: 'DRIVER',
+            reason: reason || null,
+            reasonNote: normalizedReasonNote,
+          }
+        }
+      });
+    }
+
     return updatedBooking;
   });
 
-  if (wasConfirmed) {
-    await checkAndApplyPassengerSuspension(passengerId, { confirmedOnly: true });
+  if (isPassengerCancelling && wasConfirmed) {
+    await checkAndApplyPassengerSuspension(userId, { confirmedOnly: true });
   }
 
   return updated;

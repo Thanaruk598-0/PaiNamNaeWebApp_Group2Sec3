@@ -9,7 +9,7 @@ const getDisplayName = (u) => {
 };
 
 exports.getPaymentInfo = asyncHandler(async (req, res) => {
-    const userId = req.user.sub; 
+    const userId = req.user.sub;
 
     const user = await prisma.user.findUnique({
         where: { id: userId },
@@ -38,9 +38,16 @@ exports.updatePromptPay = asyncHandler(async (req, res) => {
 
 exports.updatePromptPayQr = asyncHandler(async (req, res) => {
     const userId = req.user.sub;
-    if (!req.file) throw new ApiError(400, 'QR file is required');
+    const fileFromSingle = req.file;
+    const fileFromFields =
+        req.files?.qr?.[0] ||
+        req.files?.file?.[0] ||
+        req.files?.promptPayQr?.[0];
+    const uploadedFile = fileFromSingle || fileFromFields;
 
-    const uploadResult = await uploadToCloudinary(req.file.buffer, 'payments/promptpay-qr');
+    if (!uploadedFile) throw new ApiError(400, 'QR file is required');
+
+    const uploadResult = await uploadToCloudinary(uploadedFile.buffer, 'payments/promptpay-qr');
 
     const user = await prisma.user.update({
         where: { id: userId },

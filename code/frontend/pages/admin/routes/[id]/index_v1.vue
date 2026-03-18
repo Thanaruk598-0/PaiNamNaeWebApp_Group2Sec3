@@ -18,7 +18,7 @@
                 <div class="flex flex-col gap-3 mb-6 sm:flex-row sm:items-center sm:justify-between">
                     <div class="flex items-center gap-3">
                         <h1 class="text-2xl font-semibold text-gray-800">รายละเอียดเส้นทาง</h1>
-                        <span class="text-sm text-gray-500">ดูข้อมูลทั้งหมดของ Route</span>
+                        <span class="text-sm text-gray-500">ดูข้อมูลทั้งหมดของเส้นทาง</span>
                     </div>
                     <!-- ที่วางปุ่ม/สวิตช์ในอนาคต (รอ API) -->
                 </div>

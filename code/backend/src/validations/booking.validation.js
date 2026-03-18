@@ -13,7 +13,7 @@ const idParamSchema = z.object({
 });
 
 const updateBookingStatusSchema = z.object({
-  status: z.nativeEnum(BookingStatus, {
+  status: z.enum(['CONFIRMED', 'REJECTED'], {
     required_error: 'Status is required',
     invalid_type_error: 'Invalid status value',
   }),
@@ -64,7 +64,8 @@ const cancelBookingSchema = z.object({
     'SAFETY_CONCERN',
     'WEATHER_OR_FORCE_MAJEURE',
     'COMMUNICATION_ISSUE'
-  ], { required_error: 'กรุณาเลือกเหตุผลในการยกเลิก' })
+  ], { required_error: 'กรุณาเลือกเหตุผลในการยกเลิก' }),
+  reasonNote: z.string().trim().max(255, 'reasonNote must be 255 chars or less').optional(),
 });
 
 module.exports = {
