@@ -130,6 +130,7 @@ model User {
   createdRoutes           Route[]             @relation("DriverRoutes")
   bookings                Booking[]           @relation("PassengerBookings")
   promptPayId             String?
+  promptPayQrUrl          String?
   bankAccounts            BankAccount[]
   passengerPayments       Payment[]           @relation("PassengerPayments")
   driverPayments          Payment[]           @relation("DriverPayments")
