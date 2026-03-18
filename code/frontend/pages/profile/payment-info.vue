@@ -232,7 +232,9 @@
 
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-700">เลขที่บัญชี</label>
-                        <input v-model="accountNumber" type="text" placeholder="เช่น 123-4-56789-0"
+                        <input v-model="accountNumber" type="text" inputmode="numeric"
+                            @input="accountNumber = accountNumber.replace(/\D/g, '')"
+                            placeholder="ระบุเลขบัญชีธนาคาร (ตัวเลขเท่านั้น)"
                             class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
 
@@ -260,7 +262,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, reactive } from 'vue'
+import { ref, onMounted, onUnmounted, reactive, watch } from 'vue'
 import ProfileSidebar from '~/components/ProfileSidebar.vue'
 import { useToast } from '~/composables/useToast'
 import { getBankLogoUrl } from '~/utils/bankAssets'
@@ -293,6 +295,12 @@ const isBankDropdownOpen = ref(false)
 const selectedBank = ref(null)
 const accountNumber = ref('')
 const accountName = ref('')
+
+watch(accountNumber, (newVal) => {
+    if (newVal) {
+        accountNumber.value = newVal.replace(/\D/g, '')
+    }
+})
 
 const banks = [
     { code: 'KTB', name: 'ธนาคารกรุงไทย', badge: 'KTB', color: '#1D4ED8' },
