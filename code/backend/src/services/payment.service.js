@@ -10,7 +10,11 @@ const getBookingWithRelations = async (bookingId) => {
     include: {
       route: {
         include: {
-          driver: true,
+          driver: {
+            include: {
+              bankAccounts: true,
+            },
+          },
         },
       },
       passenger: true,
@@ -30,18 +34,36 @@ const getPaymentByBooking = async (bookingId, userId) => {
     throw new ApiError(403, 'Forbidden');
   }
 
+  const driverName = `${booking.route?.driver?.firstName || ''} ${booking.route?.driver?.lastName || ''}`.trim()
+    || booking.route?.driver?.username
+    || booking.route?.driver?.email
+    || null;
+
+  const driverPaymentMethods = {
+    ownerName: driverName,
+    promptPayId: booking.route?.driver?.promptPayId || null,
+    promptPayQrUrl: booking.route?.driver?.promptPayQrUrl || null,
+    bankAccounts: booking.route?.driver?.bankAccounts || [],
+  };
+
   if (!booking.payment) {
-    return null;
+    return {
+      payment: null,
+      driverPaymentMethods,
+      amount: booking.numberOfSeats * booking.route.pricePerSeat,
+    };
   }
 
   const payment = await prisma.payment.findUnique({
     where: { id: booking.payment.id },
-    include: {
-      documents: true,
-    },
+    include: { documents: true },
   });
 
-  return payment;
+  return {
+    payment,
+    driverPaymentMethods,
+    amount: booking.numberOfSeats * booking.route.pricePerSeat,
+  };
 };
 
 const ensureCanDeclarePayment = (booking, passengerId) => {

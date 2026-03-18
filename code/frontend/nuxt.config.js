@@ -5,12 +5,15 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   runtimeConfig: {
     public: {
-      apiBase: "http://localhost:3005/api/",
+      apiBase: /^https?:\/\//.test(process.env.NUXT_PUBLIC_API_BASE || "")
+        ? process.env.NUXT_PUBLIC_API_BASE
+        : "http://localhost:3005/api/",
       googleMapsApiKey: process.env.NUXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""
     },
   },
   devServer: {
     port: 3001,
+    strictPort: true,
   },
   plugins: ["~/plugins/api.client.js"],
   app: {
@@ -27,6 +30,9 @@ export default defineNuxtConfig({
   },
   vite: {
     plugins: [tailwindcssVite()],
+    server: {
+      strictPort: true,
+    },
   },
 
   css: [

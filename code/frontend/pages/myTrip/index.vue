@@ -261,49 +261,11 @@
             :confirmText="modalContent.confirmText" :variant="modalContent.variant" @confirm="handleConfirmAction"
             @cancel="closeConfirmModal" />
 
-        <!-- Modal: ชำระเงิน -->
-        <div v-if="isPaymentModalVisible" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-            @click.self="closePaymentModal">
-            <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-xl">
-                <h3 class="text-lg font-semibold text-gray-900">ชำระเงินค่าบริการ</h3>
-                <p class="mt-1 text-sm text-gray-600">
-                    เส้นทาง: {{ activePaymentTrip?.origin }} → {{ activePaymentTrip?.destination }}
-                </p>
-                <p class="mt-1 text-sm font-medium text-gray-900">
-                    ยอดชำระ: {{ activePaymentTrip?.price }} บาท ({{ activePaymentTrip?.seats }} ที่นั่ง)
-                </p>
-
-                <div class="mt-4 space-y-3">
-                    <div>
-                        <label class="block mb-1 text-sm text-gray-700">ช่องทางการชำระเงิน</label>
-                        <select v-model="paymentMethod"
-                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                            <option value="BANK_TRANSFER">โอนเงิน / อัปโหลดสลิป</option>
-                            <option value="CASH">ชำระเงินสดกับคนขับ</option>
-                        </select>
-                    </div>
-
-                    <div v-if="paymentMethod === 'BANK_TRANSFER'" class="space-y-2">
-                        <label class="block mb-1 text-sm text-gray-700">อัปโหลดสลิปการโอนเงิน</label>
-                        <input type="file" accept="image/*" @change="onSlipSelected"
-                            class="block w-full text-sm text-gray-700" />
-                        <p class="text-xs text-gray-500">รองรับไฟล์รูปภาพ ขนาดไม่เกิน 5MB</p>
-                        <p v-if="paymentSlipError" class="mt-1 text-xs text-red-600">{{ paymentSlipError }}</p>
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-2 mt-6">
-                    <button @click="closePaymentModal"
-                        class="px-4 py-2 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
-                        ปิด
-                    </button>
-                    <button @click="submitPayment" :disabled="isSubmittingPayment || !canSubmitPayment"
-                        class="px-4 py-2 text-sm text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:opacity-50">
-                        {{ isSubmittingPayment ? 'กำลังดำเนินการ...' : 'ยืนยันการชำระเงิน' }}
-                    </button>
-                </div>
-            </div>
-        </div>
+        <PassengerPaymentModal
+            v-model="isPaymentModalVisible"
+            :trip="activePaymentTrip"
+            @success="fetchMyTrips"
+        />
 
         <BookingChatModal ref="bookingChatModal" />
 
@@ -337,6 +299,7 @@ import buddhistEra from 'dayjs/plugin/buddhistEra'
 import ConfirmModal from '~/components/ConfirmModal.vue'
 import BookingChatModal from '~/components/BookingChatModal.vue'
 import PaymentDocumentModal from '~/components/PaymentDocumentModal.vue'
+import PassengerPaymentModal from '~/components/PassengerPaymentModal.vue'
 import { useToast } from '~/composables/useToast'
 
 // Setup dayjs for Thai locale
@@ -379,20 +342,9 @@ let stopMarkers = []
 
 const GMAPS_CB = '__gmapsReady__'
 
-// --- Payment state ---
+// --- Payment modal (new flow) ---
 const isPaymentModalVisible = ref(false)
 const activePaymentTrip = ref(null)
-const paymentMethod = ref('BANK_TRANSFER')
-const paymentSlipFile = ref(null)
-const isSubmittingPayment = ref(false)
-const paymentSlipError = ref('')
-
-const canSubmitPayment = computed(() => {
-    if (paymentMethod.value === 'BANK_TRANSFER') {
-        return !!paymentSlipFile.value
-    }
-    return true
-})
 
 const tabs = [
     { status: 'pending', label: 'รอดำเนินการ' },
@@ -647,72 +599,12 @@ const toggleTripDetails = (tripId) => {
 
 const openPaymentModal = (trip) => {
     activePaymentTrip.value = trip
-    paymentMethod.value = 'BANK_TRANSFER'
-    paymentSlipFile.value = null
-    paymentSlipError.value = ''
     isPaymentModalVisible.value = true
 }
 
 const closePaymentModal = () => {
     isPaymentModalVisible.value = false
     activePaymentTrip.value = null
-    paymentSlipFile.value = null
-    paymentSlipError.value = ''
-}
-
-const onSlipSelected = (event) => {
-    const file = event.target.files?.[0]
-    if (!file) {
-        paymentSlipFile.value = null
-        return
-    }
-    if (file.size > 5 * 1024 * 1024) {
-        paymentSlipError.value = 'ไฟล์มีขนาดเกิน 5MB'
-        paymentSlipFile.value = null
-        return
-    }
-    paymentSlipError.value = ''
-    paymentSlipFile.value = file
-}
-
-const submitPayment = async () => {
-    if (!activePaymentTrip.value) return
-    if (paymentMethod.value === 'BANK_TRANSFER' && !paymentSlipFile.value) {
-        paymentSlipError.value = 'กรุณาอัปโหลดสลิปการชำระเงิน'
-        return
-    }
-
-    isSubmittingPayment.value = true
-    try {
-        const bookingId = activePaymentTrip.value.id
-
-        if (paymentMethod.value === 'CASH') {
-            await $api(`/payments/booking/${bookingId}/cash`, {
-                method: 'POST',
-            })
-        } else {
-            const formData = new FormData()
-            formData.append('method', 'BANK_TRANSFER')
-            formData.append('slip', paymentSlipFile.value)
-
-            await $fetch(`${useRuntimeConfig().public.apiBase}payments/booking/${bookingId}/slip`, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    Authorization: `Bearer ${useCookie('token').value || ''}`,
-                },
-            })
-        }
-
-        toast.success('ส่งข้อมูลการชำระเงินเรียบร้อยแล้ว')
-        closePaymentModal()
-        await fetchMyTrips()
-    } catch (error) {
-        console.error('submitPayment error', error)
-        toast.error(error?.statusMessage || 'ไม่สามารถส่งข้อมูลการชำระเงินได้')
-    } finally {
-        isSubmittingPayment.value = false
-    }
 }
 
 const downloadReceiptVoucher = async (trip) => {
