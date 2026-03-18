@@ -99,7 +99,7 @@
                   >
                     <div class="flex items-start justify-between gap-3">
                       <div class="min-w-0">
-                        <p class="text-xs font-semibold text-gray-500 tracking-wide">PROMPTPAY ID</p>
+                        <p class="text-xs font-semibold text-gray-500 tracking-wide">PROMPTPAY</p>
                         <div class="flex items-center gap-2">
                           <p class="mt-1 font-extrabold text-gray-900 text-lg leading-none">
                             {{ driverMethods.promptPayId }}
