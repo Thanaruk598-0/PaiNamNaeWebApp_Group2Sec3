@@ -135,6 +135,15 @@
                         <p class="text-xs font-semibold text-gray-500 tracking-wide">QR CODE</p>
                         <p class="mt-0.5 text-sm text-slate-500">สแกนเพื่อโอนเงิน</p>
                       </div>
+                    <div class="flex items-center gap-2">
+                      <button
+                        v-if="!isPdf(driverMethods.promptPayQrUrl)"
+                        type="button"
+                        @click="downloadQrCode(driverMethods.promptPayQrUrl)"
+                        class="shrink-0 inline-flex items-center justify-center px-3 py-2 rounded-xl bg-blue-50 text-blue-700 font-semibold text-sm hover:bg-blue-100 border border-blue-100"
+                      >
+                        ดาวน์โหลด
+                      </button>
                       <a
                         :href="driverMethods.promptPayQrUrl"
                         target="_blank"
@@ -143,6 +152,7 @@
                       >
                         เปิดเต็มจอ
                       </a>
+                    </div>
                     </div>
                     <div v-if="!isPdf(driverMethods.promptPayQrUrl)" class="mt-3 rounded-xl overflow-hidden border border-gray-100 bg-white">
                       <img :src="driverMethods.promptPayQrUrl" class="w-full h-44 object-contain bg-white" alt="promptpay qr" />
@@ -478,6 +488,30 @@ function copyToClipboard(text, label) {
   }).catch(() => {
     toast.error('ไม่สามารถคัดลอกได้')
   })
+}
+
+async function downloadQrCode(url) {
+  if (!url) return
+  try {
+    const response = await fetch(url)
+    const blob = await response.blob()
+    const blobUrl = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = blobUrl
+    link.download = `qr-code-${Date.now()}.png`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(blobUrl)
+    toast.success('ดาวน์โหลดรูปภาพเรียบร้อยแล้ว')
+  } catch (err) {
+    // Fallback if fetch fails (e.g. CORS)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'qr-code.png'
+    link.target = '_blank'
+    link.click()
+  }
 }
 
 watch(
